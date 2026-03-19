@@ -32,7 +32,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       message,
     )}`;
 
-    if (status >= HttpStatus.BAD_REQUEST && status < HttpStatus.INTERNAL_SERVER_ERROR) {
+    if (status >= 400 && status < 500) {
       this.logger.warn(logMessage);
     } else {
       this.logger.error(logMessage);

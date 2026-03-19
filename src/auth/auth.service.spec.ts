@@ -24,15 +24,14 @@ const mockJwtService = {
 };
 
 const mockConfigService = {
-  getOrThrow: jest
-    .fn((key: string) => {
-      const values: Record<string, string> = {
-        JWT_SECRET: 'super_secret_key_that_is_at_least_32_chars',
-        JWT_ISSUER: 'healthai-api',
-        JWT_AUDIENCE: 'healthai-web',
-      };
-      return values[key] ?? 'default_value';
-    }),
+  getOrThrow: jest.fn((key: string) => {
+    const values: Record<string, string> = {
+      JWT_SECRET: 'super_secret_key_that_is_at_least_32_chars',
+      JWT_ISSUER: 'healthai-api',
+      JWT_AUDIENCE: 'healthai-web',
+    };
+    return values[key] ?? 'default_value';
+  }),
   get: jest.fn().mockReturnValue('3600s'),
 };
 
@@ -70,13 +69,16 @@ describe('AuthService', () => {
       });
 
       expect(result).toEqual({ access_token: 'signed_token' });
-      expect(mockJwtService.sign).toHaveBeenCalledWith({
-        sub: user.id,
-        email: user.email,
-      }, {
-        issuer: 'healthai-api',
-        audience: 'healthai-web',
-      });
+      expect(mockJwtService.sign).toHaveBeenCalledWith(
+        {
+          sub: user.id,
+          email: user.email,
+        },
+        {
+          issuer: 'healthai-api',
+          audience: 'healthai-web',
+        },
+      );
     });
 
     it('should throw UnauthorizedException when user is not found', async () => {

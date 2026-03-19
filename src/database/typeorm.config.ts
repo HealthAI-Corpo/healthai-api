@@ -11,6 +11,9 @@ export function buildTypeOrmOptions(
     url: configService.getOrThrow<string>('DATABASE_URL'),
     entities: [User],
     synchronize: configService.get<string>('NODE_ENV') !== 'production',
-    migrations: ['src/database/migrations/*.ts', 'dist/database/migrations/*.js'],
+    migrations: [
+      'src/database/migrations/*.ts',
+      'dist/database/migrations/*.js',
+    ],
   };
 }

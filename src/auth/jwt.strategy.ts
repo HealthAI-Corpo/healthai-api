@@ -24,17 +24,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: JwtPayload): Promise<User> {
+  async validate(payload: JwtPayload): Promise<Omit<User, 'password'>> {
     const user = await this.userRepository.findOne({
       where: { id: payload.sub },
     });
     if (!user) {
       throw new UnauthorizedException('Token invalid or user not found');
     }
-    // Ensure sensitive fields such as the password are not attached to request.user
-    if ((user as any).password !== undefined) {
-      delete (user as any).password;
-    }
-    return user;
+    return {
+      id: user.id,
+      email: user.email,
+    };
   }
 }
