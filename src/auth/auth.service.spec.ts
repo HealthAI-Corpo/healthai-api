@@ -25,8 +25,14 @@ const mockJwtService = {
 
 const mockConfigService = {
   getOrThrow: jest
-    .fn()
-    .mockReturnValue('super_secret_key_that_is_at_least_32_chars'),
+    .fn((key: string) => {
+      const values: Record<string, string> = {
+        JWT_SECRET: 'super_secret_key_that_is_at_least_32_chars',
+        JWT_ISSUER: 'healthai-api',
+        JWT_AUDIENCE: 'healthai-web',
+      };
+      return values[key] ?? 'default_value';
+    }),
   get: jest.fn().mockReturnValue('3600s'),
 };
 
@@ -67,6 +73,9 @@ describe('AuthService', () => {
       expect(mockJwtService.sign).toHaveBeenCalledWith({
         sub: user.id,
         email: user.email,
+      }, {
+        issuer: 'healthai-api',
+        audience: 'healthai-web',
       });
     });
 

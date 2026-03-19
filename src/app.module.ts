@@ -8,12 +8,14 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { User } from './auth/entities/user.entity';
 import { ApiKeyGuard } from './auth/guards/api-key.guard';
+import { ClientIdGuard } from './auth/guards/client-id.guard';
 import { envValidationSchema } from './config/env.validation';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: ['.env.local', '.env'],
       validationSchema: envValidationSchema,
     }),
     TypeOrmModule.forRootAsync({
@@ -34,6 +36,10 @@ import { envValidationSchema } from './config/env.validation';
     {
       provide: APP_GUARD,
       useClass: ApiKeyGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ClientIdGuard,
     },
   ],
 })

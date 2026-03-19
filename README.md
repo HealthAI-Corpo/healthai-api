@@ -25,6 +25,20 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## API usage
+
+- Swagger UI: `http://localhost:3001/api/docs`
+- Detailed usage and curl examples: [`../../docs/API_USAGE.md`](../../docs/API_USAGE.md)
+
+Security headers required on every request:
+
+- `x-api-key`
+- `x-client-id`
+
+JWT-protected routes also require:
+
+- `Authorization: Bearer <access_token>`
+
 ## Project setup
 
 ```bash
@@ -42,7 +56,14 @@ $ npm run start:dev
 
 # production mode
 $ npm run start:prod
+
+# seed default dev account (create/update)
+$ npm run seed:dev-account
 ```
+
+The `seed:dev-account` script is intended for development only. It uses
+`DEV_DEFAULT_USER_EMAIL` and `DEV_DEFAULT_USER_PASSWORD` from your API env file
+to create the account, or update its password if it already exists.
 
 ## Run tests
 

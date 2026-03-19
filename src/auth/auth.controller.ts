@@ -11,6 +11,7 @@ import { LoginDto } from './dto/login.dto';
 
 @ApiTags('auth')
 @ApiSecurity('x-api-key')
+@ApiSecurity('x-client-id')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

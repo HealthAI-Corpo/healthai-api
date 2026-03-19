@@ -10,8 +10,24 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const configService = app.get(ConfigService);
+  const allowedOrigins = configService
+    .getOrThrow<string>('FRONTEND_ORIGIN')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter((origin) => origin.length > 0);
 
   app.useGlobalFilters(new HttpExceptionFilter());
+  app.enableCors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error('CORS policy: origin not allowed'));
+    },
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'x-client-id'],
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -29,6 +45,10 @@ async function bootstrap() {
     .setVersion('1.0')
     .addBearerAuth()
     .addApiKey({ type: 'apiKey', name: 'x-api-key', in: 'header' }, 'x-api-key')
+    .addApiKey(
+      { type: 'apiKey', name: 'x-client-id', in: 'header' },
+      'x-client-id',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
