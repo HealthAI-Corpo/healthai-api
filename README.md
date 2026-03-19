@@ -27,7 +27,7 @@
 
 ## API usage
 
-- Swagger UI: `http://localhost:3001/api/docs`
+- Swagger UI: `http://localhost:3001/doc`
 - Detailed usage and curl examples: [`../../docs/API_USAGE.md`](../../docs/API_USAGE.md)
 
 Security headers required on every request:
