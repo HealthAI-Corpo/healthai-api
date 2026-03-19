@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { TerminusModule } from '@nestjs/terminus';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppController } from './app.controller';
@@ -10,6 +11,14 @@ import { ApiKeyGuard } from './auth/guards/api-key.guard';
 import { ClientIdGuard } from './auth/guards/client-id.guard';
 import { envValidationSchema } from './config/env.validation';
 import { buildTypeOrmOptions } from './database/typeorm.config';
+import { HealthController } from './health/health.controller';
+import { EtlModule } from './etl/etl.module';
+import { UsersModule } from './users/users.module';
+import { FoodsModule } from './foods/foods.module';
+import { ExercisesModule } from './exercises/exercises.module';
+import { MetricsModule } from './metrics/metrics.module';
+import { AdminModule } from './admin/admin.module';
+import { ExportsModule } from './exports/exports.module';
 
 @Module({
   imports: [
@@ -24,9 +33,17 @@ import { buildTypeOrmOptions } from './database/typeorm.config';
         buildTypeOrmOptions(configService),
       inject: [ConfigService],
     }),
+    TerminusModule,
     AuthModule,
+    EtlModule,
+    UsersModule,
+    FoodsModule,
+    ExercisesModule,
+    MetricsModule,
+    AdminModule,
+    ExportsModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, HealthController],
   providers: [
     AppService,
     {
