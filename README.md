@@ -45,6 +45,25 @@ JWT-protected routes also require:
 $ npm install
 ```
 
+## TypeORM integration
+
+The API uses TypeORM with PostgreSQL and provides migration scripts through a
+dedicated DataSource (`src/database/typeorm.datasource.ts`).
+
+```bash
+# generate migration from entity changes
+$ npm run migration:generate
+
+# create empty migration file
+$ npm run migration:create
+
+# apply migrations
+$ npm run migration:run
+
+# revert last migration
+$ npm run migration:revert
+```
+
 ## Compile and run the project
 
 ```bash

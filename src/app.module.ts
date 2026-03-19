@@ -6,10 +6,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
-import { User } from './auth/entities/user.entity';
 import { ApiKeyGuard } from './auth/guards/api-key.guard';
 import { ClientIdGuard } from './auth/guards/client-id.guard';
 import { envValidationSchema } from './config/env.validation';
+import { buildTypeOrmOptions } from './database/typeorm.config';
 
 @Module({
   imports: [
@@ -20,12 +20,8 @@ import { envValidationSchema } from './config/env.validation';
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        url: configService.getOrThrow<string>('DATABASE_URL'),
-        entities: [User],
-        synchronize: configService.get<string>('NODE_ENV') !== 'production',
-      }),
+      useFactory: (configService: ConfigService) =>
+        buildTypeOrmOptions(configService),
       inject: [ConfigService],
     }),
     AuthModule,
