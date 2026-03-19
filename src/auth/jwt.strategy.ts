@@ -29,6 +29,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       throw new UnauthorizedException('Token invalid or user not found');
     }
+    // Ensure sensitive fields such as the password are not attached to request.user
+    if ((user as any).password !== undefined) {
+      delete (user as any).password;
+    }
     return user;
   }
 }
