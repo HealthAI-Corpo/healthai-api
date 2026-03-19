@@ -28,14 +28,20 @@ export class HttpExceptionFilter implements ExceptionFilter {
         ? (exceptionResponse as Record<string, unknown>).message
         : exceptionResponse;
 
-    this.logger.error(
-      `${request.method} ${request.url} — ${status}: ${JSON.stringify(message)}`,
-    );
+    const logMessage = `${request.method} ${request.path} — ${status}: ${JSON.stringify(
+      message,
+    )}`;
+
+    if (status >= HttpStatus.BAD_REQUEST && status < HttpStatus.INTERNAL_SERVER_ERROR) {
+      this.logger.warn(logMessage);
+    } else {
+      this.logger.error(logMessage);
+    }
 
     response.status(status).json({
       statusCode: status,
       timestamp: new Date().toISOString(),
-      path: request.url,
+      path: request.path,
       message,
     });
   }
