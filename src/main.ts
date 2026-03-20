@@ -4,17 +4,21 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
+import { normalizeOrigin } from './common/cors-origin.util';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bodyParser: false,
+  });
 
   const configService = app.get(ConfigService);
   const allowedOrigins = configService
     .getOrThrow<string>('FRONTEND_ORIGIN')
     .split(',')
     .map((origin) => origin.trim())
-    .filter((origin) => origin.length > 0);
+    .filter((origin) => origin.length > 0)
+    .map((origin) => normalizeOrigin(origin));
 
   app.useGlobalFilters(new HttpExceptionFilter());
   app.enableCors({
@@ -22,19 +26,21 @@ async function bootstrap() {
       origin: string | undefined,
       callback: (err: Error | null, allow?: boolean) => void,
     ) => {
-      if (origin === undefined || allowedOrigins.includes(origin)) {
+      if (origin === undefined) {
         callback(null, true);
         return;
       }
+
+      const normalizedOrigin = normalizeOrigin(origin);
+      if (allowedOrigins.includes(normalizedOrigin)) {
+        callback(null, true);
+        return;
+      }
+
       callback(new Error('CORS policy: origin not allowed'));
     },
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-    allowedHeaders: [
-      'Content-Type',
-      'Authorization',
-      'x-api-key',
-      'x-client-id',
-    ],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   app.useGlobalPipes(
@@ -52,11 +58,6 @@ async function bootstrap() {
     )
     .setVersion('1.0')
     .addBearerAuth()
-    .addApiKey({ type: 'apiKey', name: 'x-api-key', in: 'header' }, 'x-api-key')
-    .addApiKey(
-      { type: 'apiKey', name: 'x-client-id', in: 'header' },
-      'x-client-id',
-    )
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);

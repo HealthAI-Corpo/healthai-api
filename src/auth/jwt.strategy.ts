@@ -5,15 +5,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Repository } from 'typeorm';
 
-import { User } from './entities/user.entity';
+import { Utilisateur } from '../database/entities/utilisateur.entity';
 import { JwtPayload } from './auth.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     configService: ConfigService,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    @InjectRepository(Utilisateur)
+    private readonly utilisateurRepository: Repository<Utilisateur>,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -24,16 +24,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: JwtPayload): Promise<Omit<User, 'password'>> {
-    const user = await this.userRepository.findOne({
-      where: { id: payload.sub },
+  async validate(
+    payload: JwtPayload,
+  ): Promise<Pick<Utilisateur, 'idUtilisateur' | 'email'>> {
+    const utilisateur = await this.utilisateurRepository.findOne({
+      where: { idUtilisateur: payload.sub },
     });
-    if (!user) {
+    if (!utilisateur) {
       throw new UnauthorizedException('Token invalid or user not found');
     }
     return {
-      id: user.id,
-      email: user.email,
+      idUtilisateur: utilisateur.idUtilisateur,
+      email: utilisateur.email,
     };
   }
 }

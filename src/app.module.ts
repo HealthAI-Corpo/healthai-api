@@ -1,24 +1,22 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
 import { TerminusModule } from '@nestjs/terminus';
+import { AuthModule as BetterAuthModule } from '@thallesp/nestjs-better-auth';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
-import { ApiKeyGuard } from './auth/guards/api-key.guard';
-import { ClientIdGuard } from './auth/guards/client-id.guard';
+import { auth as betterAuth } from './better-auth/auth';
 import { envValidationSchema } from './config/env.validation';
 import { buildTypeOrmOptions } from './database/typeorm.config';
 import { HealthController } from './health/health.controller';
-import { EtlModule } from './etl/etl.module';
-import { UsersModule } from './users/users.module';
-import { FoodsModule } from './foods/foods.module';
-import { ExercisesModule } from './exercises/exercises.module';
-import { MetricsModule } from './metrics/metrics.module';
-import { AdminModule } from './admin/admin.module';
-import { ExportsModule } from './exports/exports.module';
+import { AlimentsModule } from './aliments/aliments.module';
+import { ExercicesModule } from './exercices/exercices.module';
+import { LogAlimentsModule } from './log-aliments/log-aliments.module';
+import { LogSantesModule } from './log-santes/log-santes.module';
+import { LogSeancesModule } from './log-seances/log-seances.module';
+import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
 
 @Module({
   imports: [
@@ -34,26 +32,19 @@ import { ExportsModule } from './exports/exports.module';
       inject: [ConfigService],
     }),
     TerminusModule,
+    BetterAuthModule.forRoot({
+      auth: betterAuth,
+      disableGlobalAuthGuard: true,
+    }),
     AuthModule,
-    EtlModule,
-    UsersModule,
-    FoodsModule,
-    ExercisesModule,
-    MetricsModule,
-    AdminModule,
-    ExportsModule,
+    UtilisateursModule,
+    AlimentsModule,
+    ExercicesModule,
+    LogAlimentsModule,
+    LogSeancesModule,
+    LogSantesModule,
   ],
   controllers: [AppController, HealthController],
-  providers: [
-    AppService,
-    {
-      provide: APP_GUARD,
-      useClass: ApiKeyGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: ClientIdGuard,
-    },
-  ],
+  providers: [AppService],
 })
 export class AppModule {}

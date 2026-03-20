@@ -1,7 +1,12 @@
 import { config } from 'dotenv';
 import { DataSource } from 'typeorm';
 
-import { User } from '../auth/entities/user.entity';
+import { Aliment } from './entities/aliment.entity';
+import { Exercice } from './entities/exercice.entity';
+import { LogAliment } from './entities/log-aliment.entity';
+import { LogSante } from './entities/log-sante.entity';
+import { LogSeance } from './entities/log-seance.entity';
+import { Utilisateur } from './entities/utilisateur.entity';
 
 config({ path: '.env.local' });
 config({ path: '.env' });
@@ -14,7 +19,7 @@ if (!databaseUrl) {
 const AppDataSource = new DataSource({
   type: 'postgres',
   url: databaseUrl,
-  entities: [User],
+  entities: [Utilisateur, Aliment, Exercice, LogAliment, LogSeance, LogSante],
   migrations: ['src/database/migrations/*.ts', 'dist/database/migrations/*.js'],
 });
 
