@@ -4,6 +4,6 @@ import { EtlService } from './etl.service';
 
 @Module({
   controllers: [EtlController],
-  providers: [EtlService]
+  providers: [EtlService],
 })
 export class EtlModule {}
