@@ -16,7 +16,9 @@ describe('HealthController (with global guards)', () => {
 
   beforeEach(async () => {
     const healthCheckMock = {
-      check: jest.fn().mockResolvedValue({ status: 'ok', info: {}, error: {}, details: {} }),
+      check: jest
+        .fn()
+        .mockResolvedValue({ status: 'ok', info: {}, error: {}, details: {} }),
     };
     const dbMock = {
       pingCheck: jest.fn().mockResolvedValue({ database: { status: 'up' } }),
@@ -35,7 +37,8 @@ describe('HealthController (with global guards)', () => {
                 API_KEY: 'test-api-key',
                 FRONTEND_CLIENT_ID: 'test-client-id',
               };
-              if (!(key in map)) throw new Error(`Config key not found: ${key}`);
+              if (!(key in map))
+                throw new Error(`Config key not found: ${key}`);
               return map[key];
             },
             get: (key: string, fallback?: string) => fallback,
