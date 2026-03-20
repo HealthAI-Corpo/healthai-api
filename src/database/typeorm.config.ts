@@ -1,7 +1,12 @@
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
-import { User } from '../auth/entities/user.entity';
+import { Aliment } from './entities/aliment.entity';
+import { Exercice } from './entities/exercice.entity';
+import { LogAliment } from './entities/log-aliment.entity';
+import { LogSante } from './entities/log-sante.entity';
+import { LogSeance } from './entities/log-seance.entity';
+import { Utilisateur } from './entities/utilisateur.entity';
 
 export function buildTypeOrmOptions(
   configService: ConfigService,
@@ -9,11 +14,9 @@ export function buildTypeOrmOptions(
   return {
     type: 'postgres',
     url: configService.getOrThrow<string>('DATABASE_URL'),
-    entities: [User],
-    synchronize: configService.get<string>('NODE_ENV') !== 'production',
-    migrations: [
-      'src/database/migrations/*.ts',
-      'dist/database/migrations/*.js',
-    ],
+    entities: [Utilisateur, Aliment, Exercice, LogAliment, LogSeance, LogSante],
+    synchronize: false,
+    migrationsRun: true,
+    migrations: ['dist/database/migrations/*.js'],
   };
 }
