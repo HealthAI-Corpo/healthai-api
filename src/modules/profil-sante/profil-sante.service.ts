@@ -25,7 +25,7 @@ export class ProfilSanteService {
 
   async findOne(id: number): Promise<ProfilSante> {
     const profilSante = await this.profilSanteRepository.findOne({
-      where: { idProfilSante: id },
+      where: { idProfil: id },
     });
 
     if (!profilSante) {
