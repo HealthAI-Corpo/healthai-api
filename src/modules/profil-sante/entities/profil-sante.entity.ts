@@ -13,7 +13,13 @@ export class ProfilSante {
   @PrimaryGeneratedColumn({ name: 'id_profil' })
   idProfil: number;
 
-  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true, name: 'poids_kg' })
+  @Column({
+    type: 'decimal',
+    precision: 5,
+    scale: 2,
+    nullable: true,
+    name: 'poids_kg',
+  })
   poidsKg: number;
 
   @Column({ type: 'int', nullable: true, name: 'taille_cm' })
@@ -22,10 +28,20 @@ export class ProfilSante {
   @Column({ type: 'decimal', precision: 4, scale: 1, nullable: true })
   imc: number;
 
-  @Column({ type: 'varchar', length: 100, nullable: true, name: 'niveau_activite' })
+  @Column({
+    type: 'varchar',
+    length: 100,
+    nullable: true,
+    name: 'niveau_activite',
+  })
   niveauActivite: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true, name: 'type_maladie' })
+  @Column({
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+    name: 'type_maladie',
+  })
   @Index()
   typeMaladie: string;
 
@@ -38,10 +54,20 @@ export class ProfilSante {
   @Column({ type: 'text', nullable: true })
   allergies: string;
 
-  @Column({ type: 'varchar', length: 200, nullable: true, name: 'objectif_principal' })
+  @Column({
+    type: 'varchar',
+    length: 200,
+    nullable: true,
+    name: 'objectif_principal',
+  })
   objectifPrincipal: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true, name: 'experience_sportive' })
+  @Column({
+    type: 'varchar',
+    length: 100,
+    nullable: true,
+    name: 'experience_sportive',
+  })
   experienceSportive: string;
 
   @Column({ type: 'int', nullable: true, name: 'frequence_entrainement' })
@@ -55,7 +81,12 @@ export class ProfilSante {
   @JoinColumn({ name: 'id_utilisateur' })
   utilisateur: Utilisateur;
 
-  @Column({ type: 'int', nullable: false, unique: true, name: 'id_utilisateur' })
+  @Column({
+    type: 'int',
+    nullable: false,
+    unique: true,
+    name: 'id_utilisateur',
+  })
   @Index()
   idUtilisateur: number;
 }

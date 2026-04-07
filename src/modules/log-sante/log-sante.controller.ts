@@ -50,7 +50,7 @@ export class LogSanteController {
   @Get()
   @ApiOperation({
     summary: 'Lister tous les logs santé',
-    description: 'Récupère l\'historique complet des métriques de santé',
+    description: "Récupère l'historique complet des métriques de santé",
   })
   @ApiResponse({
     status: 200,
@@ -63,7 +63,7 @@ export class LogSanteController {
   @Get(':id')
   @ApiOperation({
     summary: 'Récupérer un log santé',
-    description: 'Détails des métriques de santé d\'une journée',
+    description: "Détails des métriques de santé d'une journée",
   })
   @ApiParam({
     name: 'id',

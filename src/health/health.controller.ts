@@ -22,7 +22,7 @@ export class HealthController {
   @ApiOperation({
     summary: 'Health check',
     description:
-      'Vérifie l\'état de santé de l\'API et la connectivité à la base de données (endpoint public)',
+      "Vérifie l'état de santé de l'API et la connectivité à la base de données (endpoint public)",
   })
   @ApiResponse({
     status: 200,

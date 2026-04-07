@@ -62,12 +62,12 @@ export class UtilisateurController {
   @Get(':id')
   @ApiOperation({
     summary: 'Récupérer un utilisateur',
-    description: 'Récupère les détails d\'un utilisateur par son ID',
+    description: "Récupère les détails d'un utilisateur par son ID",
   })
   @ApiParam({
     name: 'id',
     type: 'integer',
-    description: 'ID de l\'utilisateur',
+    description: "ID de l'utilisateur",
     example: 1,
   })
   @ApiResponse({
@@ -85,12 +85,12 @@ export class UtilisateurController {
   @Patch(':id')
   @ApiOperation({
     summary: 'Modifier un utilisateur',
-    description: 'Met à jour partiellement les informations d\'un utilisateur',
+    description: "Met à jour partiellement les informations d'un utilisateur",
   })
   @ApiParam({
     name: 'id',
     type: 'integer',
-    description: 'ID de l\'utilisateur',
+    description: "ID de l'utilisateur",
     example: 1,
   })
   @ApiBody({ type: UpdateUtilisateurDto })
@@ -123,7 +123,7 @@ export class UtilisateurController {
   @ApiParam({
     name: 'id',
     type: 'integer',
-    description: 'ID de l\'utilisateur',
+    description: "ID de l'utilisateur",
     example: 1,
   })
   @ApiResponse({

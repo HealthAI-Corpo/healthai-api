@@ -15,11 +15,21 @@ export class Exercice {
   @Column({ type: 'varchar', length: 150, nullable: false })
   nom: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true, name: 'type_exercice' })
+  @Column({
+    type: 'varchar',
+    length: 100,
+    nullable: true,
+    name: 'type_exercice',
+  })
   @Index()
   typeExercice: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true, name: 'muscle_cible' })
+  @Column({
+    type: 'varchar',
+    length: 100,
+    nullable: true,
+    name: 'muscle_cible',
+  })
   muscleCible: string;
 
   @Column({ type: 'varchar', length: 100, nullable: true })

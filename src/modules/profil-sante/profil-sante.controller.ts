@@ -116,7 +116,7 @@ export class ProfilSanteController {
   @ApiOperation({
     summary: 'Supprimer un profil santé',
     description:
-      'Supprime un profil santé (automatiquement supprimé en cascade si l\'utilisateur est supprimé)',
+      "Supprime un profil santé (automatiquement supprimé en cascade si l'utilisateur est supprimé)",
   })
   @ApiParam({
     name: 'id',

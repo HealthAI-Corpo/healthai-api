@@ -33,13 +33,23 @@ export class Utilisateur {
   @Column({ type: 'varchar', length: 50, nullable: true })
   genre: string;
 
-  @Column({ type: 'varchar', length: 50, nullable: true, name: 'type_abonnement' })
+  @Column({
+    type: 'varchar',
+    length: 50,
+    nullable: true,
+    name: 'type_abonnement',
+  })
   typeAbonnement: string;
 
   @CreateDateColumn({ type: 'timestamp', name: 'date_inscription' })
   dateInscription: Date;
 
-  @Column({ type: 'varchar', length: 255, nullable: false, name: 'mot_de_passe_hash' })
+  @Column({
+    type: 'varchar',
+    length: 255,
+    nullable: false,
+    name: 'mot_de_passe_hash',
+  })
   motDePasseHash: string;
 
   @OneToMany(() => LogAliment, (logAliment) => logAliment.utilisateur, {

@@ -17,13 +17,31 @@ export class LogSante {
   @Index()
   dateLog: Date;
 
-  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true, name: 'poids_kg' })
+  @Column({
+    type: 'decimal',
+    precision: 5,
+    scale: 2,
+    nullable: true,
+    name: 'poids_kg',
+  })
   poidsKg: number;
 
-  @Column({ type: 'decimal', precision: 4, scale: 1, nullable: true, name: 'pourcentage_gras' })
+  @Column({
+    type: 'decimal',
+    precision: 4,
+    scale: 1,
+    nullable: true,
+    name: 'pourcentage_gras',
+  })
   pourcentageGras: number;
 
-  @Column({ type: 'decimal', precision: 4, scale: 1, nullable: true, name: 'imc_actuel' })
+  @Column({
+    type: 'decimal',
+    precision: 4,
+    scale: 1,
+    nullable: true,
+    name: 'imc_actuel',
+  })
   imcActuel: number;
 
   @Column({ type: 'int', nullable: true, name: 'bpm_moyen_journee' })
@@ -35,10 +53,22 @@ export class LogSante {
   @Column({ type: 'int', nullable: true, name: 'nb_pas' })
   nbPas: number;
 
-  @Column({ type: 'decimal', precision: 4, scale: 2, nullable: true, name: 'heures_sommeil' })
+  @Column({
+    type: 'decimal',
+    precision: 4,
+    scale: 2,
+    nullable: true,
+    name: 'heures_sommeil',
+  })
   heuresSommeil: number;
 
-  @Column({ type: 'decimal', precision: 4, scale: 2, nullable: true, name: 'hydratation_litres' })
+  @Column({
+    type: 'decimal',
+    precision: 4,
+    scale: 2,
+    nullable: true,
+    name: 'hydratation_litres',
+  })
   hydratationLitres: number;
 
   @ManyToOne(() => Utilisateur, (utilisateur) => utilisateur.logsSante, {

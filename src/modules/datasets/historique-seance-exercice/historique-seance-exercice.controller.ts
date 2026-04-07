@@ -34,7 +34,7 @@ export class HistoriqueSeanceExerciceController {
   @ApiOperation({
     summary: 'Créer une entrée dataset exercices',
     description:
-      'Ajoute des données d\'historique d\'exercices pré-nettoyées pour IA (CRUD simple, pas d\'ETL)',
+      "Ajoute des données d'historique d'exercices pré-nettoyées pour IA (CRUD simple, pas d'ETL)",
   })
   @ApiBody({ type: CreateHistoriqueSeanceExerciceDto })
   @ApiResponse({
@@ -46,7 +46,8 @@ export class HistoriqueSeanceExerciceController {
     description: 'Données invalides',
   })
   create(
-    @Body() createHistoriqueSeanceExerciceDto: CreateHistoriqueSeanceExerciceDto,
+    @Body()
+    createHistoriqueSeanceExerciceDto: CreateHistoriqueSeanceExerciceDto,
   ) {
     return this.historiqueSeanceExerciceService.create(
       createHistoriqueSeanceExerciceDto,
@@ -69,12 +70,12 @@ export class HistoriqueSeanceExerciceController {
   @Get(':id')
   @ApiOperation({
     summary: 'Récupérer une entrée dataset',
-    description: 'Détails d\'un historique d\'exercice du dataset',
+    description: "Détails d'un historique d'exercice du dataset",
   })
   @ApiParam({
     name: 'id',
     type: 'integer',
-    description: 'ID de l\'entrée',
+    description: "ID de l'entrée",
     example: 1,
   })
   @ApiResponse({
@@ -92,12 +93,12 @@ export class HistoriqueSeanceExerciceController {
   @Patch(':id')
   @ApiOperation({
     summary: 'Modifier une entrée dataset',
-    description: 'Met à jour un historique d\'exercice du dataset',
+    description: "Met à jour un historique d'exercice du dataset",
   })
   @ApiParam({
     name: 'id',
     type: 'integer',
-    description: 'ID de l\'entrée',
+    description: "ID de l'entrée",
     example: 1,
   })
   @ApiBody({ type: UpdateHistoriqueSeanceExerciceDto })
@@ -111,7 +112,8 @@ export class HistoriqueSeanceExerciceController {
   })
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateHistoriqueSeanceExerciceDto: UpdateHistoriqueSeanceExerciceDto,
+    @Body()
+    updateHistoriqueSeanceExerciceDto: UpdateHistoriqueSeanceExerciceDto,
   ) {
     return this.historiqueSeanceExerciceService.update(
       id,
@@ -123,12 +125,12 @@ export class HistoriqueSeanceExerciceController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Supprimer une entrée dataset',
-    description: 'Supprime un historique d\'exercice du dataset',
+    description: "Supprime un historique d'exercice du dataset",
   })
   @ApiParam({
     name: 'id',
     type: 'integer',
-    description: 'ID de l\'entrée',
+    description: "ID de l'entrée",
     example: 1,
   })
   @ApiResponse({

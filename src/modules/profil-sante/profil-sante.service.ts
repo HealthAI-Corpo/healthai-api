@@ -12,7 +12,9 @@ export class ProfilSanteService {
     private readonly profilSanteRepository: Repository<ProfilSante>,
   ) {}
 
-  async create(createProfilSanteDto: CreateProfilSanteDto): Promise<ProfilSante> {
+  async create(
+    createProfilSanteDto: CreateProfilSanteDto,
+  ): Promise<ProfilSante> {
     const profilSante = this.profilSanteRepository.create(createProfilSanteDto);
     return this.profilSanteRepository.save(profilSante);
   }
@@ -33,7 +35,10 @@ export class ProfilSanteService {
     return profilSante;
   }
 
-  async update(id: number, updateProfilSanteDto: UpdateProfilSanteDto): Promise<ProfilSante> {
+  async update(
+    id: number,
+    updateProfilSanteDto: UpdateProfilSanteDto,
+  ): Promise<ProfilSante> {
     const profilSante = await this.findOne(id);
     Object.assign(profilSante, updateProfilSanteDto);
     return this.profilSanteRepository.save(profilSante);

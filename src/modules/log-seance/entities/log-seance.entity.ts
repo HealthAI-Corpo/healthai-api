@@ -22,10 +22,22 @@ export class LogSeance {
   @Index()
   typeSeance: string;
 
-  @Column({ type: 'decimal', precision: 5, scale: 1, nullable: true, name: 'duree_minutes' })
+  @Column({
+    type: 'decimal',
+    precision: 5,
+    scale: 1,
+    nullable: true,
+    name: 'duree_minutes',
+  })
   dureeMinutes: number;
 
-  @Column({ type: 'decimal', precision: 6, scale: 1, nullable: true, name: 'calorie_brulee' })
+  @Column({
+    type: 'decimal',
+    precision: 6,
+    scale: 1,
+    nullable: true,
+    name: 'calorie_brulee',
+  })
   calorieBrulee: number;
 
   @Column({ type: 'int', nullable: true, name: 'bpm_moyen' })

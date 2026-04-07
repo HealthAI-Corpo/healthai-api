@@ -63,13 +63,12 @@ export class ExerciceController {
   @Get(':id')
   @ApiOperation({
     summary: 'Récupérer un exercice',
-    description:
-      'Détails d\'un exercice avec instructions et caractéristiques',
+    description: "Détails d'un exercice avec instructions et caractéristiques",
   })
   @ApiParam({
     name: 'id',
     type: 'integer',
-    description: 'ID de l\'exercice',
+    description: "ID de l'exercice",
     example: 1,
   })
   @ApiResponse({
@@ -87,12 +86,12 @@ export class ExerciceController {
   @Patch(':id')
   @ApiOperation({
     summary: 'Modifier un exercice',
-    description: 'Met à jour les informations d\'un exercice',
+    description: "Met à jour les informations d'un exercice",
   })
   @ApiParam({
     name: 'id',
     type: 'integer',
-    description: 'ID de l\'exercice',
+    description: "ID de l'exercice",
     example: 1,
   })
   @ApiBody({ type: UpdateExerciceDto })
@@ -116,12 +115,12 @@ export class ExerciceController {
   @ApiOperation({
     summary: 'Supprimer un exercice',
     description:
-      'ATTENTION: La suppression est bloquée si l\'exercice est référencé dans des logs de séance',
+      "ATTENTION: La suppression est bloquée si l'exercice est référencé dans des logs de séance",
   })
   @ApiParam({
     name: 'id',
     type: 'integer',
-    description: 'ID de l\'exercice',
+    description: "ID de l'exercice",
     example: 1,
   })
   @ApiResponse({

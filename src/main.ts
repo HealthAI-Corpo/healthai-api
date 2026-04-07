@@ -99,16 +99,16 @@ async function bootstrap() {
     )
     .addTag('auth', 'Authentification et gestion des sessions')
     .addTag('utilisateurs', 'Gestion des utilisateurs')
-    .addTag('aliments', 'Catalogue des aliments et informations nutritionnelles')
+    .addTag(
+      'aliments',
+      'Catalogue des aliments et informations nutritionnelles',
+    )
     .addTag('exercices', 'Catalogue des exercices')
     .addTag('log-aliments', 'Journal alimentaire des utilisateurs')
     .addTag('log-seances', "Journal d'entraînement")
     .addTag('log-santes', 'Métriques de santé quotidiennes')
     .addTag('profil-sante', 'Profils santé des utilisateurs')
-    .addTag(
-      'datasets-recommandations',
-      'Dataset IA - Recommandations régimes',
-    )
+    .addTag('datasets-recommandations', 'Dataset IA - Recommandations régimes')
     .addTag('datasets-exercices', 'Dataset IA - Historique séances exercice')
     .addTag('health', 'Endpoints de monitoring et health checks')
     .build();

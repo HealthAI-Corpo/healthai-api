@@ -33,7 +33,7 @@ export class RecommandationsRegimeController {
   @ApiOperation({
     summary: 'Créer une entrée dataset recommandations',
     description:
-      'Ajoute des données de recommandations alimentaires pré-nettoyées pour IA (CRUD simple, pas d\'ETL)',
+      "Ajoute des données de recommandations alimentaires pré-nettoyées pour IA (CRUD simple, pas d'ETL)",
   })
   @ApiBody({ type: CreateRecommandationsRegimeDto })
   @ApiResponse({
@@ -44,8 +44,12 @@ export class RecommandationsRegimeController {
     status: 400,
     description: 'Données invalides',
   })
-  create(@Body() createRecommandationsRegimeDto: CreateRecommandationsRegimeDto) {
-    return this.recommandationsRegimeService.create(createRecommandationsRegimeDto);
+  create(
+    @Body() createRecommandationsRegimeDto: CreateRecommandationsRegimeDto,
+  ) {
+    return this.recommandationsRegimeService.create(
+      createRecommandationsRegimeDto,
+    );
   }
 
   @Get()
@@ -64,12 +68,12 @@ export class RecommandationsRegimeController {
   @Get(':id')
   @ApiOperation({
     summary: 'Récupérer une entrée dataset',
-    description: 'Détails d\'une recommandation alimentaire du dataset',
+    description: "Détails d'une recommandation alimentaire du dataset",
   })
   @ApiParam({
     name: 'id',
     type: 'string',
-    description: 'ID de l\'entrée',
+    description: "ID de l'entrée",
     example: 'rec-001',
   })
   @ApiResponse({
@@ -92,7 +96,7 @@ export class RecommandationsRegimeController {
   @ApiParam({
     name: 'id',
     type: 'string',
-    description: 'ID de l\'entrée',
+    description: "ID de l'entrée",
     example: 'rec-001',
   })
   @ApiBody({ type: UpdateRecommandationsRegimeDto })
@@ -123,7 +127,7 @@ export class RecommandationsRegimeController {
   @ApiParam({
     name: 'id',
     type: 'string',
-    description: 'ID de l\'entrée',
+    description: "ID de l'entrée",
     example: 'rec-001',
   })
   @ApiResponse({
