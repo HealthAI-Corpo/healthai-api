@@ -13,6 +13,10 @@ export class ProfilSante {
   @PrimaryGeneratedColumn({ name: 'id_profil' })
   idProfil: number;
 
+  // backward-compatibility alias used by older code/compilation artifacts
+  // Not mapped to the DB (no @Column). Exists strictly for TypeScript typing.
+  idProfilSante?: number;
+
   @Column({
     type: 'decimal',
     precision: 5,
