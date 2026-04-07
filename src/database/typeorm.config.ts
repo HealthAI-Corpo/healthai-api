@@ -34,7 +34,7 @@ export function buildTypeOrmOptions(
       HistoriqueSeanceExercice,
     ],
     synchronize: false,
-    migrationsRun: true,
+    migrationsRun: false,
     migrations: ['dist/database/migrations/*.js'],
   };
 }
