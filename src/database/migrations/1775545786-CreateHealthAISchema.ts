@@ -64,9 +64,9 @@ export class CreateHealthAISchema1775545786 implements MigrationInterface {
       CREATE TABLE "log_aliment" (
         "id_log_aliment" SERIAL NOT NULL,
         "log_date" TIMESTAMP NOT NULL,
-        "type_repas" VARCHAR(50),
-        "quantite_g" NUMERIC(7,2),
-        "unite" VARCHAR(20),
+        "repas" VARCHAR(50) NOT NULL,
+        "quantite" NUMERIC(7,2) NOT NULL,
+        "unite" VARCHAR(20) DEFAULT 'g',
         "id_utilisateur" INTEGER NOT NULL,
         "id_aliment" INTEGER NOT NULL,
         CONSTRAINT "PK_log_aliment" PRIMARY KEY ("id_log_aliment")
@@ -109,7 +109,7 @@ export class CreateHealthAISchema1775545786 implements MigrationInterface {
     // Table PROFIL_SANTE
     await queryRunner.query(`
       CREATE TABLE "profil_sante" (
-        "id_profil_sante" SERIAL NOT NULL,
+        "id_profil" SERIAL NOT NULL,
         "poids_kg" NUMERIC(5,2),
         "taille_cm" INTEGER,
         "imc" NUMERIC(4,1),
@@ -122,7 +122,7 @@ export class CreateHealthAISchema1775545786 implements MigrationInterface {
         "experience_sportive" VARCHAR(100),
         "frequence_entrainement" INTEGER,
         "id_utilisateur" INTEGER NOT NULL,
-        CONSTRAINT "PK_profil_sante" PRIMARY KEY ("id_profil_sante"),
+        CONSTRAINT "PK_profil_sante" PRIMARY KEY ("id_profil"),
         CONSTRAINT "UQ_profil_sante_utilisateur" UNIQUE ("id_utilisateur")
       )
     `);
@@ -134,7 +134,7 @@ export class CreateHealthAISchema1775545786 implements MigrationInterface {
     // Table DATASET_RECOMMANDATIONS_REGIME
     await queryRunner.query(`
       CREATE TABLE "dataset_recommandations_regime" (
-        "id_dataset_recommandations_regime" VARCHAR NOT NULL,
+        "id_dataset_recommandations_regime" SERIAL NOT NULL,
         "age" INTEGER,
         "sexe" VARCHAR,
         "poids_kg" NUMERIC(5,2),
@@ -160,7 +160,7 @@ export class CreateHealthAISchema1775545786 implements MigrationInterface {
     // Table DATASET_HISTORIQUE_SEANCE_EXERCICE
     await queryRunner.query(`
       CREATE TABLE "dataset_historique_seance_exercice" (
-        "id_dataset_historique_seance_exercice" INTEGER NOT NULL,
+        "id_dataset_historique_seance_exercice" SERIAL NOT NULL,
         "age" INTEGER,
         "sexe" VARCHAR,
         "poids_kg" NUMERIC(5,2),
@@ -203,7 +203,7 @@ export class CreateHealthAISchema1775545786 implements MigrationInterface {
       CREATE INDEX "IDX_log_aliment_log_date" ON "log_aliment" ("log_date")
     `);
     await queryRunner.query(`
-      CREATE INDEX "IDX_log_aliment_type_repas" ON "log_aliment" ("type_repas")
+      CREATE INDEX "IDX_log_aliment_repas" ON "log_aliment" ("repas")
     `);
 
     // Index sur log_seance
@@ -362,7 +362,7 @@ export class CreateHealthAISchema1775545786 implements MigrationInterface {
     `);
 
     await queryRunner.query(`
-      DROP INDEX "IDX_log_aliment_type_repas"
+      DROP INDEX "IDX_log_aliment_repas"
     `);
 
     await queryRunner.query(`
