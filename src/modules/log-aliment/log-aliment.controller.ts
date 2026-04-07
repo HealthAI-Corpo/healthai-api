@@ -50,7 +50,7 @@ export class LogAlimentController {
   @Get()
   @ApiOperation({
     summary: 'Lister tous les logs alimentaires',
-    description: 'Récupère l\'historique complet des consommations alimentaires',
+    description: "Récupère l'historique complet des consommations alimentaires",
   })
   @ApiResponse({
     status: 200,
@@ -63,7 +63,7 @@ export class LogAlimentController {
   @Get(':id')
   @ApiOperation({
     summary: 'Récupérer un log alimentaire',
-    description: 'Détails d\'une consommation alimentaire',
+    description: "Détails d'une consommation alimentaire",
   })
   @ApiParam({
     name: 'id',

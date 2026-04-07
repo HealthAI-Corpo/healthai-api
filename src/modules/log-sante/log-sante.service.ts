@@ -33,7 +33,10 @@ export class LogSanteService {
     return logSante;
   }
 
-  async update(id: number, updateLogSanteDto: UpdateLogSanteDto): Promise<LogSante> {
+  async update(
+    id: number,
+    updateLogSanteDto: UpdateLogSanteDto,
+  ): Promise<LogSante> {
     const logSante = await this.findOne(id);
     Object.assign(logSante, updateLogSanteDto);
     return this.logSanteRepository.save(logSante);

@@ -40,10 +40,22 @@ export class Aliment {
   @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
   sucres: number;
 
-  @Column({ type: 'decimal', precision: 7, scale: 2, nullable: true, name: 'sodium_mg' })
+  @Column({
+    type: 'decimal',
+    precision: 7,
+    scale: 2,
+    nullable: true,
+    name: 'sodium_mg',
+  })
   sodiumMg: number;
 
-  @Column({ type: 'decimal', precision: 7, scale: 2, nullable: true, name: 'cholesterol_mg' })
+  @Column({
+    type: 'decimal',
+    precision: 7,
+    scale: 2,
+    nullable: true,
+    name: 'cholesterol_mg',
+  })
   cholesterolMg: number;
 
   @Column({ type: 'varchar', length: 20, nullable: true, name: 'unite_mesure' })

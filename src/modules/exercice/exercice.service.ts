@@ -33,7 +33,10 @@ export class ExerciceService {
     return exercice;
   }
 
-  async update(id: number, updateExerciceDto: UpdateExerciceDto): Promise<Exercice> {
+  async update(
+    id: number,
+    updateExerciceDto: UpdateExerciceDto,
+  ): Promise<Exercice> {
     const exercice = await this.findOne(id);
     Object.assign(exercice, updateExerciceDto);
     return this.exerciceRepository.save(exercice);

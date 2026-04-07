@@ -22,7 +22,13 @@ export class LogAliment {
   @Index()
   typeRepas: string;
 
-  @Column({ type: 'decimal', precision: 7, scale: 2, nullable: true, name: 'quantite_g' })
+  @Column({
+    type: 'decimal',
+    precision: 7,
+    scale: 2,
+    nullable: true,
+    name: 'quantite_g',
+  })
   quantiteG: number;
 
   @Column({ type: 'varchar', length: 20, nullable: true })

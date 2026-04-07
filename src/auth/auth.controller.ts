@@ -20,7 +20,7 @@ export class AuthController {
   @ApiOperation({
     summary: 'Connexion utilisateur',
     description:
-      "Authentification par email et mot de passe. Retourne un JWT token à utiliser dans les headers Authorization pour les requêtes protégées.",
+      'Authentification par email et mot de passe. Retourne un JWT token à utiliser dans les headers Authorization pour les requêtes protégées.',
   })
   @ApiBody({
     type: LoginDto,

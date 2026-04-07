@@ -33,7 +33,10 @@ export class AlimentService {
     return aliment;
   }
 
-  async update(id: number, updateAlimentDto: UpdateAlimentDto): Promise<Aliment> {
+  async update(
+    id: number,
+    updateAlimentDto: UpdateAlimentDto,
+  ): Promise<Aliment> {
     const aliment = await this.findOne(id);
     Object.assign(aliment, updateAlimentDto);
     return this.alimentRepository.save(aliment);

@@ -32,7 +32,7 @@ export class LogSeanceController {
   @ApiOperation({
     summary: 'Créer un log de séance',
     description:
-      'Enregistre une séance d\'entraînement pour un utilisateur (exercice, durée, calories, BPM)',
+      "Enregistre une séance d'entraînement pour un utilisateur (exercice, durée, calories, BPM)",
   })
   @ApiBody({ type: CreateLogSeanceDto })
   @ApiResponse({
@@ -50,7 +50,7 @@ export class LogSeanceController {
   @Get()
   @ApiOperation({
     summary: 'Lister tous les logs de séance',
-    description: 'Récupère l\'historique complet des séances d\'entraînement',
+    description: "Récupère l'historique complet des séances d'entraînement",
   })
   @ApiResponse({
     status: 200,
@@ -63,7 +63,7 @@ export class LogSeanceController {
   @Get(':id')
   @ApiOperation({
     summary: 'Récupérer un log de séance',
-    description: 'Détails d\'une séance d\'entraînement',
+    description: "Détails d'une séance d'entraînement",
   })
   @ApiParam({
     name: 'id',
@@ -86,7 +86,7 @@ export class LogSeanceController {
   @Patch(':id')
   @ApiOperation({
     summary: 'Modifier un log de séance',
-    description: 'Met à jour une entrée du journal d\'entraînement',
+    description: "Met à jour une entrée du journal d'entraînement",
   })
   @ApiParam({
     name: 'id',
@@ -114,7 +114,7 @@ export class LogSeanceController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Supprimer un log de séance',
-    description: 'Supprime une entrée du journal d\'entraînement',
+    description: "Supprime une entrée du journal d'entraînement",
   })
   @ApiParam({
     name: 'id',

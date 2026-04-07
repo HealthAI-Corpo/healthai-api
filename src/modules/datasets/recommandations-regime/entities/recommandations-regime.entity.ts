@@ -11,7 +11,13 @@ export class RecommandationsRegime {
   @Column({ type: 'varchar', nullable: true })
   sexe: string;
 
-  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true, name: 'poids_kg' })
+  @Column({
+    type: 'decimal',
+    precision: 5,
+    scale: 2,
+    nullable: true,
+    name: 'poids_kg',
+  })
   poidsKg: number;
 
   @Column({ type: 'int', nullable: true, name: 'taille_cm' })
@@ -30,16 +36,38 @@ export class RecommandationsRegime {
   @Column({ type: 'int', nullable: true, name: 'apport_calorique_journalier' })
   apportCaloriqueJournalier: number;
 
-  @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true, name: 'cholesterol_mg_dl' })
+  @Column({
+    type: 'decimal',
+    precision: 6,
+    scale: 2,
+    nullable: true,
+    name: 'cholesterol_mg_dl',
+  })
   cholesterolMgDl: number;
 
-  @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true, name: 'tension_arterielle_mmHg' })
+  @Column({
+    type: 'decimal',
+    precision: 6,
+    scale: 2,
+    nullable: true,
+    name: 'tension_arterielle_mmHg',
+  })
   tensionArterielleMMHg: number;
 
-  @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true, name: 'glucose_mg_dl' })
+  @Column({
+    type: 'decimal',
+    precision: 6,
+    scale: 2,
+    nullable: true,
+    name: 'glucose_mg_dl',
+  })
   glucoseMgDl: number;
 
-  @Column({ type: 'varchar', nullable: true, name: 'restrictions_alimentaires' })
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    name: 'restrictions_alimentaires',
+  })
   restrictionsAlimentaires: string;
 
   @Column({ type: 'varchar', nullable: true })
@@ -48,13 +76,31 @@ export class RecommandationsRegime {
   @Column({ type: 'varchar', nullable: true, name: 'cuisine_preferee' })
   cuisinePreferee: string;
 
-  @Column({ type: 'decimal', precision: 4, scale: 2, nullable: true, name: 'heures_exercice_semaine' })
+  @Column({
+    type: 'decimal',
+    precision: 4,
+    scale: 2,
+    nullable: true,
+    name: 'heures_exercice_semaine',
+  })
   heuresExerciceSemaine: number;
 
-  @Column({ type: 'decimal', precision: 4, scale: 2, nullable: true, name: 'adherence_regime' })
+  @Column({
+    type: 'decimal',
+    precision: 4,
+    scale: 2,
+    nullable: true,
+    name: 'adherence_regime',
+  })
   adherenceRegime: number;
 
-  @Column({ type: 'decimal', precision: 4, scale: 2, nullable: true, name: 'score_desequilibre_nutriment' })
+  @Column({
+    type: 'decimal',
+    precision: 4,
+    scale: 2,
+    nullable: true,
+    name: 'score_desequilibre_nutriment',
+  })
   scoreDesequilibreNutriment: number;
 
   @Column({ type: 'varchar', nullable: true, name: 'recommandation_regime' })

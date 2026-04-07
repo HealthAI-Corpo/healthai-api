@@ -63,12 +63,12 @@ export class AlimentController {
   @Get(':id')
   @ApiOperation({
     summary: 'Récupérer un aliment',
-    description: 'Détails d\'un aliment avec ses valeurs nutritionnelles',
+    description: "Détails d'un aliment avec ses valeurs nutritionnelles",
   })
   @ApiParam({
     name: 'id',
     type: 'integer',
-    description: 'ID de l\'aliment',
+    description: "ID de l'aliment",
     example: 1,
   })
   @ApiResponse({
@@ -86,12 +86,12 @@ export class AlimentController {
   @Patch(':id')
   @ApiOperation({
     summary: 'Modifier un aliment',
-    description: 'Met à jour les informations d\'un aliment',
+    description: "Met à jour les informations d'un aliment",
   })
   @ApiParam({
     name: 'id',
     type: 'integer',
-    description: 'ID de l\'aliment',
+    description: "ID de l'aliment",
     example: 1,
   })
   @ApiBody({ type: UpdateAlimentDto })
@@ -115,12 +115,12 @@ export class AlimentController {
   @ApiOperation({
     summary: 'Supprimer un aliment',
     description:
-      'ATTENTION: La suppression est bloquée si l\'aliment est référencé dans des logs alimentaires',
+      "ATTENTION: La suppression est bloquée si l'aliment est référencé dans des logs alimentaires",
   })
   @ApiParam({
     name: 'id',
     type: 'integer',
-    description: 'ID de l\'aliment',
+    description: "ID de l'aliment",
     example: 1,
   })
   @ApiResponse({

@@ -33,7 +33,10 @@ export class LogAlimentService {
     return logAliment;
   }
 
-  async update(id: number, updateLogAlimentDto: UpdateLogAlimentDto): Promise<LogAliment> {
+  async update(
+    id: number,
+    updateLogAlimentDto: UpdateLogAlimentDto,
+  ): Promise<LogAliment> {
     const logAliment = await this.findOne(id);
     Object.assign(logAliment, updateLogAlimentDto);
     return this.logAlimentRepository.save(logAliment);

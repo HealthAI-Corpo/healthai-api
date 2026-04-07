@@ -12,7 +12,9 @@ export class UtilisateurService {
     private readonly utilisateurRepository: Repository<Utilisateur>,
   ) {}
 
-  async create(createUtilisateurDto: CreateUtilisateurDto): Promise<Utilisateur> {
+  async create(
+    createUtilisateurDto: CreateUtilisateurDto,
+  ): Promise<Utilisateur> {
     const utilisateur = this.utilisateurRepository.create(createUtilisateurDto);
     return this.utilisateurRepository.save(utilisateur);
   }
@@ -33,7 +35,10 @@ export class UtilisateurService {
     return utilisateur;
   }
 
-  async update(id: number, updateUtilisateurDto: UpdateUtilisateurDto): Promise<Utilisateur> {
+  async update(
+    id: number,
+    updateUtilisateurDto: UpdateUtilisateurDto,
+  ): Promise<Utilisateur> {
     const utilisateur = await this.findOne(id);
     Object.assign(utilisateur, updateUtilisateurDto);
     return this.utilisateurRepository.save(utilisateur);
