@@ -52,16 +52,73 @@ async function bootstrap() {
   );
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('MSPRHealthAI API')
+    .setTitle('HealthAI API')
     .setDescription(
-      'REST API for MSPRHealthAI — authentication and health data',
+      '🏥 API REST pour la gestion de données de santé et bien-être\n\n' +
+        '**Fonctionnalités principales:**\n' +
+        '- Authentification JWT sécurisée\n' +
+        '- Gestion utilisateurs et profils santé\n' +
+        '- Catalogues aliments et exercices\n' +
+        '- Journaux alimentaires et séances\n' +
+        '- Métriques de santé quotidiennes\n' +
+        '- Datasets IA pour recommandations\n\n' +
+        '**Sécurité:**\n' +
+        '- API Key globale (header `x-api-key`)\n' +
+        '- Client ID validation (header `x-client-id`)\n' +
+        '- JWT Bearer tokens',
     )
     .setVersion('1.0')
-    .addBearerAuth()
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Entrez votre JWT token obtenu via POST /auth/login',
+        in: 'header',
+      },
+      'JWT-auth',
+    )
+    .addApiKey(
+      {
+        type: 'apiKey',
+        name: 'x-api-key',
+        in: 'header',
+        description: 'Clé API globale (requise sur toutes les routes)',
+      },
+      'api-key',
+    )
+    .addApiKey(
+      {
+        type: 'apiKey',
+        name: 'x-client-id',
+        in: 'header',
+        description: 'Identifiant client frontend',
+      },
+      'client-id',
+    )
+    .addTag('auth', 'Authentification et gestion des sessions')
+    .addTag('utilisateurs', 'Gestion des utilisateurs')
+    .addTag('aliments', 'Catalogue des aliments et informations nutritionnelles')
+    .addTag('exercices', 'Catalogue des exercices')
+    .addTag('log-aliments', 'Journal alimentaire des utilisateurs')
+    .addTag('log-seances', "Journal d'entraînement")
+    .addTag('log-santes', 'Métriques de santé quotidiennes')
+    .addTag('profil-sante', 'Profils santé des utilisateurs')
+    .addTag(
+      'datasets-recommandations',
+      'Dataset IA - Recommandations régimes',
+    )
+    .addTag('datasets-exercices', 'Dataset IA - Historique séances exercice')
+    .addTag('health', 'Endpoints de monitoring et health checks')
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('doc', app, document);
+  SwaggerModule.setup('doc', app, document, {
+    customSiteTitle: 'HealthAI API Docs',
+    customfavIcon: 'https://nestjs.com/img/logo-small.svg',
+    customCss: '.swagger-ui .topbar { display: none }',
+  });
 
   const port = configService.get<number>('PORT', 3000);
   await app.listen(port);

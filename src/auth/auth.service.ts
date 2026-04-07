@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 
-import { Utilisateur } from '../database/entities/utilisateur.entity';
+import { Utilisateur } from '../modules/utilisateur/entities/utilisateur.entity';
 import { LoginDto } from './dto/login.dto';
 
 export interface JwtPayload {

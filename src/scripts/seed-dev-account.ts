@@ -5,7 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 
 import { AppModule } from '../app.module';
-import { Utilisateur } from '../database/entities/utilisateur.entity';
+import { Utilisateur } from '../modules/utilisateur/entities/utilisateur.entity';
 
 const logger = new Logger('SeedDevAccount');
 
@@ -39,19 +39,9 @@ async function seedDevAccount(): Promise<void> {
 
     await utilisateurRepository.save(
       utilisateurRepository.create({
-        nom: process.env.DEV_DEFAULT_USER_NOM ?? 'Dev',
-        prenom: process.env.DEV_DEFAULT_USER_PRENOM ?? 'Admin',
+        nom: 'Dev',
+        prenom: 'Admin',
         email,
-        dateNaissance: process.env.DEV_DEFAULT_USER_DOB ?? '1990-01-01',
-        genre: process.env.DEV_DEFAULT_USER_GENRE ?? 'Unspecified',
-        objectifPrincipal:
-          process.env.DEV_DEFAULT_USER_OBJECTIF ?? 'General fitness',
-        poidsActuel: process.env.DEV_DEFAULT_USER_POIDS ?? '70.00',
-        tailleCm: Number(process.env.DEV_DEFAULT_USER_TAILLE_CM ?? 175),
-        typeAbonnement:
-          process.env.DEV_DEFAULT_USER_ABONNEMENT === 'Premium'
-            ? 'Premium'
-            : 'Freemium',
         motDePasseHash: hashedPassword,
       }),
     );
