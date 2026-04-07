@@ -6,7 +6,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 
-import { Utilisateur } from '../database/entities/utilisateur.entity';
+import { Utilisateur } from '../modules/utilisateur/entities/utilisateur.entity';
 import { AuthService } from './auth.service';
 
 const mockUtilisateur: Utilisateur = {
@@ -62,7 +62,9 @@ describe('AuthService', () => {
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    utilisateurRepository = module.get(getRepositoryToken(Utilisateur));
+    utilisateurRepository = module.get<Repository<Utilisateur>>(
+      getRepositoryToken(Utilisateur),
+    ) as jest.Mocked<Repository<Utilisateur>>;
   });
 
   afterEach(() => {
@@ -72,7 +74,7 @@ describe('AuthService', () => {
   describe('login', () => {
     it('should return an access_token when credentials are valid', async () => {
       const hashedPassword = await bcrypt.hash('p@ssw0rd123', 10);
-      const utilisateur = {
+      const utilisateur: Utilisateur = {
         ...mockUtilisateur,
         motDePasseHash: hashedPassword,
       };
@@ -106,7 +108,7 @@ describe('AuthService', () => {
 
     it('should throw UnauthorizedException when password is wrong', async () => {
       const hashedPassword = await bcrypt.hash('correct_password', 10);
-      const utilisateur = {
+      const utilisateur: Utilisateur = {
         ...mockUtilisateur,
         motDePasseHash: hashedPassword,
       };
@@ -121,7 +123,7 @@ describe('AuthService', () => {
     });
 
     it('should throw UnauthorizedException when stored hash is legacy plaintext', async () => {
-      const utilisateur = {
+      const utilisateur: Utilisateur = {
         ...mockUtilisateur,
         motDePasseHash: 'legacy-password-not-set',
       };
