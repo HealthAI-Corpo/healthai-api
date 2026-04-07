@@ -18,12 +18,12 @@ export class LogAliment {
   @Index()
   logDate: Date;
 
-  @Column({ type: 'varchar', length: 50, nullable: true, name: 'type_repas' })
+  @Column({ type: 'varchar', length: 50, nullable: false, name: 'repas' })
   @Index()
-  typeRepas: string;
+  repas: string;
 
-  @Column({ type: 'decimal', precision: 7, scale: 2, nullable: true, name: 'quantite_g' })
-  quantiteG: number;
+  @Column({ type: 'decimal', precision: 7, scale: 2, nullable: false, name: 'quantite' })
+  quantite: number;
 
   @Column({ type: 'varchar', length: 20, nullable: true })
   unite: string;

@@ -10,8 +10,8 @@ import { Utilisateur } from '../../utilisateur/entities/utilisateur.entity';
 
 @Entity('profil_sante')
 export class ProfilSante {
-  @PrimaryGeneratedColumn({ name: 'id_profil_sante' })
-  idProfilSante: number;
+  @PrimaryGeneratedColumn({ name: 'id_profil' })
+  idProfil: number;
 
   @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true, name: 'poids_kg' })
   poidsKg: number;
