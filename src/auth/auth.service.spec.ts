@@ -7,6 +7,7 @@ import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 
 import { Utilisateur } from '../modules/utilisateur/entities/utilisateur.entity';
+import { ProfilSante } from '../modules/profil-sante/entities/profil-sante.entity';
 import { AuthService } from './auth.service';
 
 const mockUtilisateur: Utilisateur = {
@@ -22,7 +23,7 @@ const mockUtilisateur: Utilisateur = {
   logsAliment: [],
   logsSeance: [],
   logsSante: [],
-  profilSante: {} as any,
+  profilSante: {} as unknown as ProfilSante,
 };
 
 const mockUtilisateurRepository = {
