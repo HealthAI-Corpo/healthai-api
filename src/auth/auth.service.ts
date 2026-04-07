@@ -5,32 +5,47 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 
+import { Utilisateur } from '../modules/utilisateur/entities/utilisateur.entity';
 import { LoginDto } from './dto/login.dto';
-import { User } from './entities/user.entity';
 
 export interface JwtPayload {
-  sub: string;
+  sub: number;
   email: string;
 }
+
+const BCRYPT_HASH_PATTERN = /^\$2[abxy]\$\d{2}\$[./A-Za-z0-9]{53}$/;
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    @InjectRepository(Utilisateur)
+    private readonly utilisateurRepository: Repository<Utilisateur>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
 
   async login(loginDto: LoginDto): Promise<{ access_token: string }> {
     const { email, password } = loginDto;
-    const user = await this.userRepository.findOne({ where: { email } });
+    const utilisateur = await this.utilisateurRepository.findOne({
+      where: { email },
+    });
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    const hasValidPasswordHash =
+      typeof utilisateur?.motDePasseHash === 'string' &&
+      BCRYPT_HASH_PATTERN.test(utilisateur.motDePasseHash);
+
+    if (
+      !utilisateur ||
+      !hasValidPasswordHash ||
+      !(await bcrypt.compare(password, utilisateur.motDePasseHash))
+    ) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload: JwtPayload = { sub: user.id, email: user.email };
+    const payload: JwtPayload = {
+      sub: utilisateur.idUtilisateur,
+      email: utilisateur.email,
+    };
     return {
       access_token: this.jwtService.sign(payload, {
         issuer: this.configService.getOrThrow<string>('JWT_ISSUER'),
@@ -39,7 +54,9 @@ export class AuthService {
     };
   }
 
-  async validateUser(payload: JwtPayload): Promise<User | null> {
-    return this.userRepository.findOne({ where: { id: payload.sub } });
+  async validateUser(payload: JwtPayload): Promise<Utilisateur | null> {
+    return this.utilisateurRepository.findOne({
+      where: { idUtilisateur: payload.sub },
+    });
   }
 }

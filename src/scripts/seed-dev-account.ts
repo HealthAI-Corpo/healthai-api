@@ -5,7 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 
 import { AppModule } from '../app.module';
-import { User } from '../auth/entities/user.entity';
+import { Utilisateur } from '../modules/utilisateur/entities/utilisateur.entity';
 
 const logger = new Logger('SeedDevAccount');
 
@@ -17,26 +17,32 @@ async function seedDevAccount(): Promise<void> {
   const app = await NestFactory.createApplicationContext(AppModule);
 
   try {
-    const userRepository = app.get<Repository<User>>(getRepositoryToken(User));
+    const utilisateurRepository = app.get<Repository<Utilisateur>>(
+      getRepositoryToken(Utilisateur),
+    );
     const email =
       process.env.DEV_DEFAULT_USER_EMAIL ?? 'dev-admin@healthai.local';
     const password =
       process.env.DEV_DEFAULT_USER_PASSWORD ?? 'ChangeMe123!dev-account';
 
-    const existingUser = await userRepository.findOne({ where: { email } });
+    const existingUser = await utilisateurRepository.findOne({
+      where: { email },
+    });
     const hashedPassword = await bcrypt.hash(password, 10);
 
     if (existingUser) {
-      existingUser.password = hashedPassword;
-      await userRepository.save(existingUser);
+      existingUser.motDePasseHash = hashedPassword;
+      await utilisateurRepository.save(existingUser);
       logger.log(`Updated dev account password for "${email}"`);
       return;
     }
 
-    await userRepository.save(
-      userRepository.create({
+    await utilisateurRepository.save(
+      utilisateurRepository.create({
+        nom: 'Dev',
+        prenom: 'Admin',
         email,
-        password: hashedPassword,
+        motDePasseHash: hashedPassword,
       }),
     );
     logger.log(`Created default dev account "${email}"`);

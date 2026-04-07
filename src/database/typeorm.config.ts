@@ -1,7 +1,18 @@
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
-import { User } from '../auth/entities/user.entity';
+// Entités métier
+import { Utilisateur } from '../modules/utilisateur/entities/utilisateur.entity';
+import { Aliment } from '../modules/aliment/entities/aliment.entity';
+import { Exercice } from '../modules/exercice/entities/exercice.entity';
+import { LogAliment } from '../modules/log-aliment/entities/log-aliment.entity';
+import { LogSeance } from '../modules/log-seance/entities/log-seance.entity';
+import { LogSante } from '../modules/log-sante/entities/log-sante.entity';
+import { ProfilSante } from '../modules/profil-sante/entities/profil-sante.entity';
+
+// Entités datasets
+import { RecommandationsRegime } from '../modules/datasets/recommandations-regime/entities/recommandations-regime.entity';
+import { HistoriqueSeanceExercice } from '../modules/datasets/historique-seance-exercice/entities/historique-seance-exercice.entity';
 
 export function buildTypeOrmOptions(
   configService: ConfigService,
@@ -9,11 +20,21 @@ export function buildTypeOrmOptions(
   return {
     type: 'postgres',
     url: configService.getOrThrow<string>('DATABASE_URL'),
-    entities: [User],
-    synchronize: configService.get<string>('NODE_ENV') !== 'production',
-    migrations: [
-      'src/database/migrations/*.ts',
-      'dist/database/migrations/*.js',
+    entities: [
+      // Entités métier
+      Utilisateur,
+      Aliment,
+      Exercice,
+      LogAliment,
+      LogSeance,
+      LogSante,
+      ProfilSante,
+      // Entités datasets
+      RecommandationsRegime,
+      HistoriqueSeanceExercice,
     ],
+    synchronize: false,
+    migrationsRun: true,
+    migrations: ['dist/database/migrations/*.js'],
   };
 }

@@ -12,13 +12,19 @@ import { ClientIdGuard } from './auth/guards/client-id.guard';
 import { envValidationSchema } from './config/env.validation';
 import { buildTypeOrmOptions } from './database/typeorm.config';
 import { HealthController } from './health/health.controller';
-import { EtlModule } from './etl/etl.module';
-import { UsersModule } from './users/users.module';
-import { FoodsModule } from './foods/foods.module';
-import { ExercisesModule } from './exercises/exercises.module';
-import { MetricsModule } from './metrics/metrics.module';
-import { AdminModule } from './admin/admin.module';
-import { ExportsModule } from './exports/exports.module';
+
+// Modules métier
+import { UtilisateurModule } from './modules/utilisateur/utilisateur.module';
+import { AlimentModule } from './modules/aliment/aliment.module';
+import { ExerciceModule } from './modules/exercice/exercice.module';
+import { LogAlimentModule } from './modules/log-aliment/log-aliment.module';
+import { LogSeanceModule } from './modules/log-seance/log-seance.module';
+import { LogSanteModule } from './modules/log-sante/log-sante.module';
+import { ProfilSanteModule } from './modules/profil-sante/profil-sante.module';
+
+// Modules datasets
+import { RecommandationsRegimeModule } from './modules/datasets/recommandations-regime/recommandations-regime.module';
+import { HistoriqueSeanceExerciceModule } from './modules/datasets/historique-seance-exercice/historique-seance-exercice.module';
 
 @Module({
   imports: [
@@ -35,13 +41,17 @@ import { ExportsModule } from './exports/exports.module';
     }),
     TerminusModule,
     AuthModule,
-    EtlModule,
-    UsersModule,
-    FoodsModule,
-    ExercisesModule,
-    MetricsModule,
-    AdminModule,
-    ExportsModule,
+    // Modules métier
+    UtilisateurModule,
+    AlimentModule,
+    ExerciceModule,
+    LogAlimentModule,
+    LogSeanceModule,
+    LogSanteModule,
+    ProfilSanteModule,
+    // Modules datasets
+    RecommandationsRegimeModule,
+    HistoriqueSeanceExerciceModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
