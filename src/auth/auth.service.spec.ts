@@ -7,6 +7,7 @@ import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 
 import { Utilisateur } from '../modules/utilisateur/entities/utilisateur.entity';
+import { ProfilSante } from '../modules/profil-sante/entities/profil-sante.entity';
 import { AuthService } from './auth.service';
 
 const mockUtilisateur: Utilisateur = {
@@ -14,14 +15,15 @@ const mockUtilisateur: Utilisateur = {
   nom: 'Doe',
   prenom: 'Jane',
   email: 'user@example.com',
-  dateNaissance: '1990-01-01',
+  dateDeNaissance: new Date('1990-01-01'),
   genre: 'F',
-  objectifPrincipal: 'Fitness',
-  poidsActuel: '70.00',
-  tailleCm: 170,
   typeAbonnement: 'Freemium',
   dateInscription: new Date('2024-01-01T00:00:00.000Z'),
   motDePasseHash: 'hashed_password',
+  logsAliment: [],
+  logsSeance: [],
+  logsSante: [],
+  profilSante: {} as unknown as ProfilSante,
 };
 
 const mockUtilisateurRepository = {
