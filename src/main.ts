@@ -114,10 +114,13 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
+  
+  // Setup Swagger UI at /doc
   SwaggerModule.setup('doc', app, document, {
     customSiteTitle: 'HealthAI API Docs',
     customfavIcon: 'https://nestjs.com/img/logo-small.svg',
     customCss: '.swagger-ui .topbar { display: none }',
+    jsonDocumentUrl: '/doc-json', // This makes /doc-json public automatically
   });
 
   const port = configService.get<number>('PORT', 3000);
