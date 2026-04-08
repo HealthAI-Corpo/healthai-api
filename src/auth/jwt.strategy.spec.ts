@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
+import { ProfilSante } from '../modules/profil-sante/entities/profil-sante.entity';
 import { Utilisateur } from '../modules/utilisateur/entities/utilisateur.entity';
 import { JwtStrategy } from './jwt.strategy';
 
@@ -19,7 +20,7 @@ const mockUtilisateur: Utilisateur = {
   logsAliment: [],
   logsSeance: [],
   logsSante: [],
-  profilSante: null as any,
+  profilSante: {} as unknown as ProfilSante,
 };
 
 const mockConfigService = {
@@ -45,7 +46,10 @@ describe('JwtStrategy', () => {
       providers: [
         JwtStrategy,
         { provide: ConfigService, useValue: mockConfigService },
-        { provide: getRepositoryToken(Utilisateur), useValue: mockUtilisateurRepo },
+        {
+          provide: getRepositoryToken(Utilisateur),
+          useValue: mockUtilisateurRepo,
+        },
       ],
     }).compile();
 
@@ -58,7 +62,10 @@ describe('JwtStrategy', () => {
     it('should return id and email when user is found', async () => {
       mockUtilisateurRepo.findOne.mockResolvedValue(mockUtilisateur);
 
-      const result = await strategy.validate({ sub: 1, email: 'jane@example.com' });
+      const result = await strategy.validate({
+        sub: 1,
+        email: 'jane@example.com',
+      });
 
       expect(result).toEqual({ idUtilisateur: 1, email: 'jane@example.com' });
       expect(mockUtilisateurRepo.findOne).toHaveBeenCalledWith({

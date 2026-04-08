@@ -2,6 +2,9 @@ import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
+import { ProfilSante } from '../profil-sante/entities/profil-sante.entity';
+import { CreateUtilisateurDto } from './dto/create-utilisateur.dto';
+import { UpdateUtilisateurDto } from './dto/update-utilisateur.dto';
 import { Utilisateur } from './entities/utilisateur.entity';
 import { UtilisateurService } from './utilisateur.service';
 
@@ -18,7 +21,7 @@ const mockUtilisateur: Utilisateur = {
   logsAliment: [],
   logsSeance: [],
   logsSante: [],
-  profilSante: null as any,
+  profilSante: {} as unknown as ProfilSante,
 };
 
 const mockRepo = {
@@ -59,7 +62,9 @@ describe('UtilisateurService', () => {
       mockRepo.findOne.mockResolvedValue(mockUtilisateur);
       const result = await service.findOne(1);
       expect(result).toEqual(mockUtilisateur);
-      expect(mockRepo.findOne).toHaveBeenCalledWith({ where: { idUtilisateur: 1 } });
+      expect(mockRepo.findOne).toHaveBeenCalledWith({
+        where: { idUtilisateur: 1 },
+      });
     });
 
     it('should throw NotFoundException when not found', async () => {
@@ -70,11 +75,16 @@ describe('UtilisateurService', () => {
 
   describe('create', () => {
     it('should create and return a new utilisateur', async () => {
-      const dto = { nom: 'Doe', prenom: 'John', email: 'john@example.com', motDePasseHash: 'hash' };
+      const dto: CreateUtilisateurDto = {
+        nom: 'Doe',
+        prenom: 'John',
+        email: 'john@example.com',
+        motDePasseHash: 'hash',
+      };
       mockRepo.create.mockReturnValue({ ...mockUtilisateur, ...dto });
       mockRepo.save.mockResolvedValue({ ...mockUtilisateur, ...dto });
 
-      const result = await service.create(dto as any);
+      const result = await service.create(dto);
       expect(mockRepo.create).toHaveBeenCalledWith(dto);
       expect(mockRepo.save).toHaveBeenCalledTimes(1);
       expect(result.nom).toBe('Doe');
@@ -83,17 +93,19 @@ describe('UtilisateurService', () => {
 
   describe('update', () => {
     it('should update and return the utilisateur', async () => {
+      const dto: UpdateUtilisateurDto = { nom: 'Smith' };
       const updated = { ...mockUtilisateur, nom: 'Smith' };
       mockRepo.findOne.mockResolvedValue(mockUtilisateur);
       mockRepo.save.mockResolvedValue(updated);
 
-      const result = await service.update(1, { nom: 'Smith' } as any);
+      const result = await service.update(1, dto);
       expect(result.nom).toBe('Smith');
     });
 
     it('should throw NotFoundException when utilisateur does not exist', async () => {
       mockRepo.findOne.mockResolvedValue(null);
-      await expect(service.update(999, { nom: 'X' } as any)).rejects.toThrow(NotFoundException);
+      const dto: UpdateUtilisateurDto = { nom: 'X' };
+      await expect(service.update(999, dto)).rejects.toThrow(NotFoundException);
     });
   });
 
