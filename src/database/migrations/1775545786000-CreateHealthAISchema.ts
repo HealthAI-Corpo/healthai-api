@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateHealthAISchema1775545786 implements MigrationInterface {
-  name = 'CreateHealthAISchema1775545786';
+export class CreateHealthAISchema1775545786000 implements MigrationInterface {
+  name = 'CreateHealthAISchema1775545786000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     // ========================================

@@ -17,6 +17,8 @@ import { HistoriqueSeanceExercice } from '../modules/datasets/historique-seance-
 export function buildTypeOrmOptions(
   configService: ConfigService,
 ): TypeOrmModuleOptions {
+  const runMigrations = configService.get<string>('TYPEORM_RUN_MIGRATIONS', 'true') === 'true';
+
   return {
     type: 'postgres',
     url: configService.getOrThrow<string>('DATABASE_URL'),

@@ -12,7 +12,9 @@ export const envValidationSchema = Joi.object({
   JWT_EXPIRES_IN: Joi.string().default('3600s'),
   JWT_ISSUER: Joi.string().min(3).required(),
   JWT_AUDIENCE: Joi.string().min(3).required(),
+  API_KEY: Joi.string().min(32).required(),
   FRONTEND_ORIGIN: Joi.string().min(3).required(),
-  BETTER_AUTH_SECRET: Joi.string().min(32).required(),
-  BETTER_AUTH_URL: Joi.string().uri().required(),
-});
+  FRONTEND_CLIENT_ID: Joi.string().min(8).required(),
+  DEV_DEFAULT_USER_EMAIL: Joi.string().email({ tlds: { allow: false } }).allow('').optional(),
+  DEV_DEFAULT_USER_PASSWORD: Joi.string().min(8).allow('').optional(),
+}).unknown(true); // Allow unknown env variables
