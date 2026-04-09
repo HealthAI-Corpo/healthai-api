@@ -27,6 +27,13 @@ export class ApiKeyGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<Request>();
+    
+    // Allow Swagger endpoints without authentication
+    const url = request.url;
+    if (url.startsWith('/doc') || url === '/doc-json') {
+      return true;
+    }
+
     const apiKey = request.headers['x-api-key'];
     const validApiKey = this.configService.getOrThrow<string>('API_KEY');
 
