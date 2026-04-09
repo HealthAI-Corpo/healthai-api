@@ -64,6 +64,21 @@ $ npm run migration:run
 $ npm run migration:revert
 ```
 
+## Apply migratioons on docker compose up
+
+```bash
+# from repository root
+docker compose up --build api
+```
+```bash 
+docker compose exec api npm run migration:run
+```
+
+### create a dev account 
+```
+docker compose exec api npm run seed:dev-account
+```
+
 ## Compile and run the project
 
 ```bash
