@@ -17,7 +17,7 @@ import { HistoriqueSeanceExercice } from '../modules/datasets/historique-seance-
 export function buildTypeOrmOptions(
   configService: ConfigService,
 ): TypeOrmModuleOptions {
-  const runMigrations = configService.get<string>('TYPEORM_RUN_MIGRATIONS', 'true') === 'true';
+  const migrationsRun = configService.get<string>('TYPEORM_RUN_MIGRATIONS', 'true') === 'true';
 
   return {
     type: 'postgres',
@@ -36,7 +36,7 @@ export function buildTypeOrmOptions(
       HistoriqueSeanceExercice,
     ],
     synchronize: false,
-    migrationsRun: false,
+    migrationsRun,
     migrations: ['dist/database/migrations/*.js'],
   };
 }
