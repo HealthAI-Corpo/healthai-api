@@ -8,6 +8,7 @@
   "engines": {
     "node": ">=20"
   },
+
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -17,8 +18,8 @@
     "start:prod": "node dist/main",
     "seed:dev-account": "nest start --entryFile scripts/seed-dev-account",
     "typeorm": "typeorm-ts-node-commonjs -d src/database/typeorm.datasource.ts",
-    "migration:create": "npm run typeorm -- migration:create src/database/migrations/$(date +%s)-new-migration",
-    "migration:generate": "npm run typeorm -- migration:generate src/database/migrations/auto-sync",
+    "migration:create": "typeorm-ts-node-commonjs migration:create src/database/migrations/NewMigration",
+    "migration:generate": "npm run typeorm -- migration:generate",
     "migration:run": "npm run typeorm -- migration:run",
     "migration:revert": "npm run typeorm -- migration:revert",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
