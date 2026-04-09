@@ -27,6 +27,13 @@ export class ClientIdGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<Request>();
+    
+    // Allow Swagger endpoints without authentication
+    const url = request.url;
+    if (url.startsWith('/doc') || url === '/doc-json') {
+      return true;
+    }
+
     const clientId = request.headers['x-client-id'];
     const validClientId =
       this.configService.getOrThrow<string>('FRONTEND_CLIENT_ID');
