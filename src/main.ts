@@ -73,9 +73,7 @@ async function bootstrap() {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
-        name: 'JWT',
         description: 'Entrez votre JWT token obtenu via POST /auth/login',
-        in: 'header',
       },
       'JWT-auth',
     )
@@ -124,6 +122,8 @@ async function bootstrap() {
   });
 
   const port = configService.get<number>('PORT', 3000);
-  await app.listen(port);
+  // Bind to 0.0.0.0 in Docker so the container port mapping works reliably
+  await app.listen(port, '0.0.0.0');
+  console.log(`HealthAI API listening on port ${port} (host 0.0.0.0)`);
 }
 void bootstrap().catch(console.error);
