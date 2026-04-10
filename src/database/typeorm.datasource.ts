@@ -26,7 +26,6 @@ const AppDataSource = new DataSource({
   type: 'postgres',
   url: databaseUrl,
   entities: [
-    // Entités métier
     Utilisateur,
     Aliment,
     Exercice,
@@ -34,11 +33,10 @@ const AppDataSource = new DataSource({
     LogSeance,
     LogSante,
     ProfilSante,
-    // Entités datasets
     RecommandationsRegime,
     HistoriqueSeanceExercice,
   ],
-  migrations: ['src/database/migrations/*.ts', 'dist/database/migrations/*.js'],
+  migrations: ['src/database/migrations/*.ts'],
 });
 
 export default AppDataSource;
