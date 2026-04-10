@@ -8,13 +8,11 @@ export const envValidationSchema = Joi.object({
   DATABASE_URL: Joi.string()
     .uri({ scheme: ['postgres', 'postgresql'] })
     .required(),
-  JWT_SECRET: Joi.string().min(32).required(),
-  JWT_EXPIRES_IN: Joi.string().default('3600s'),
-  JWT_ISSUER: Joi.string().min(3).required(),
-  JWT_AUDIENCE: Joi.string().min(3).required(),
+  // ZITADEL — auth provider
+  ZITADEL_ISSUER: Joi.string().uri().required(),
+  ZITADEL_JWKS_URI: Joi.string().uri().optional(),
+  // Sécurité API
   API_KEY: Joi.string().min(32).required(),
   FRONTEND_ORIGIN: Joi.string().min(3).required(),
   FRONTEND_CLIENT_ID: Joi.string().min(8).required(),
-  DEV_DEFAULT_USER_EMAIL: Joi.string().email({ tlds: { allow: false } }).allow('').optional(),
-  DEV_DEFAULT_USER_PASSWORD: Joi.string().min(8).allow('').optional(),
-}).unknown(true); // Allow unknown env variables
+}).unknown(true);

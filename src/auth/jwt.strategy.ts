@@ -1,41 +1,48 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { InjectRepository } from '@nestjs/typeorm';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { Repository } from 'typeorm';
+import { passportJwtSecret } from 'jwks-rsa';
 
-import { Utilisateur } from '../modules/utilisateur/entities/utilisateur.entity';
-import { JwtPayload } from './auth.service';
+export interface ZitadelJwtPayload {
+  sub: string;
+  iss: string;
+  aud: string | string[];
+  exp: number;
+  iat: number;
+  email?: string;
+  name?: string;
+}
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(
-    configService: ConfigService,
-    @InjectRepository(Utilisateur)
-    private readonly utilisateurRepository: Repository<Utilisateur>,
-  ) {
+  constructor(configService: ConfigService) {
+    const zitadelIssuer = configService.getOrThrow<string>('ZITADEL_ISSUER');
+    const jwksUri =
+      configService.get<string>('ZITADEL_JWKS_URI') ??
+      `${zitadelIssuer}/oauth/v2/keys`;
+
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.getOrThrow<string>('JWT_SECRET'),
-      issuer: configService.getOrThrow<string>('JWT_ISSUER'),
-      audience: configService.getOrThrow<string>('JWT_AUDIENCE'),
+      secretOrKeyProvider: passportJwtSecret({
+        cache: true,
+        rateLimit: true,
+        jwksRequestsPerMinute: 10,
+        jwksUri,
+      }),
+      issuer: zitadelIssuer,
+      algorithms: ['RS256'],
     });
   }
 
-  async validate(
-    payload: JwtPayload,
-  ): Promise<Pick<Utilisateur, 'idUtilisateur' | 'email'>> {
-    const utilisateur = await this.utilisateurRepository.findOne({
-      where: { idUtilisateur: payload.sub },
-    });
-    if (!utilisateur) {
-      throw new UnauthorizedException('Token invalid or user not found');
+  async validate(payload: ZitadelJwtPayload) {
+    if (!payload.sub) {
+      throw new UnauthorizedException('Token invalide : sub manquant');
     }
     return {
-      idUtilisateur: utilisateur.idUtilisateur,
-      email: utilisateur.email,
+      userId: payload.sub,
+      email: payload.email,
     };
   }
 }

@@ -1,41 +1,25 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
 
-import { ProfilSante } from '../modules/profil-sante/entities/profil-sante.entity';
-import { Utilisateur } from '../modules/utilisateur/entities/utilisateur.entity';
+// Mock jwks-rsa so the constructor doesn't attempt JWKS HTTP calls
+jest.mock('jwks-rsa', () => ({
+  passportJwtSecret: jest.fn().mockReturnValue(jest.fn()),
+}));
+
 import { JwtStrategy } from './jwt.strategy';
-
-const mockUtilisateur: Utilisateur = {
-  idUtilisateur: 1,
-  nom: 'Doe',
-  prenom: 'Jane',
-  email: 'jane@example.com',
-  dateDeNaissance: new Date('1990-01-01'),
-  genre: 'F',
-  typeAbonnement: 'Freemium',
-  dateInscription: new Date('2024-01-01'),
-  motDePasseHash: 'hashed',
-  logsAliment: [],
-  logsSeance: [],
-  logsSante: [],
-  profilSante: {} as unknown as ProfilSante,
-};
 
 const mockConfigService = {
   getOrThrow: jest.fn((key: string) => {
     const values: Record<string, string> = {
-      JWT_SECRET: 'super_secret_key_that_is_at_least_32_chars',
-      JWT_ISSUER: 'healthai-api',
-      JWT_AUDIENCE: 'healthai-web',
+      ZITADEL_ISSUER: 'https://zitadel.example.com',
     };
     return values[key] ?? 'default';
   }),
-};
-
-const mockUtilisateurRepo = {
-  findOne: jest.fn(),
+  get: jest.fn((key: string) => {
+    if (key === 'ZITADEL_JWKS_URI') return undefined;
+    return undefined;
+  }),
 };
 
 describe('JwtStrategy', () => {
@@ -46,10 +30,6 @@ describe('JwtStrategy', () => {
       providers: [
         JwtStrategy,
         { provide: ConfigService, useValue: mockConfigService },
-        {
-          provide: getRepositoryToken(Utilisateur),
-          useValue: mockUtilisateurRepo,
-        },
       ],
     }).compile();
 
@@ -59,25 +39,40 @@ describe('JwtStrategy', () => {
   afterEach(() => jest.clearAllMocks());
 
   describe('validate', () => {
-    it('should return id and email when user is found', async () => {
-      mockUtilisateurRepo.findOne.mockResolvedValue(mockUtilisateur);
-
+    it('should return userId and email when sub is present', async () => {
       const result = await strategy.validate({
-        sub: 1,
+        sub: 'zitadel-user-id',
+        iss: 'https://zitadel.example.com',
+        aud: 'healthai-api',
+        exp: Math.floor(Date.now() / 1000) + 3600,
+        iat: Math.floor(Date.now() / 1000),
         email: 'jane@example.com',
       });
 
-      expect(result).toEqual({ idUtilisateur: 1, email: 'jane@example.com' });
-      expect(mockUtilisateurRepo.findOne).toHaveBeenCalledWith({
-        where: { idUtilisateur: 1 },
-      });
+      expect(result).toEqual({ userId: 'zitadel-user-id', email: 'jane@example.com' });
     });
 
-    it('should throw UnauthorizedException when user is not found', async () => {
-      mockUtilisateurRepo.findOne.mockResolvedValue(null);
+    it('should return userId without email when email is absent', async () => {
+      const result = await strategy.validate({
+        sub: 'zitadel-user-id',
+        iss: 'https://zitadel.example.com',
+        aud: 'healthai-api',
+        exp: Math.floor(Date.now() / 1000) + 3600,
+        iat: Math.floor(Date.now() / 1000),
+      });
 
+      expect(result).toEqual({ userId: 'zitadel-user-id', email: undefined });
+    });
+
+    it('should throw UnauthorizedException when sub is missing', async () => {
       await expect(
-        strategy.validate({ sub: 999, email: 'nobody@example.com' }),
+        strategy.validate({
+          sub: '',
+          iss: 'https://zitadel.example.com',
+          aud: 'healthai-api',
+          exp: Math.floor(Date.now() / 1000) + 3600,
+          iat: Math.floor(Date.now() / 1000),
+        }),
       ).rejects.toThrow(UnauthorizedException);
     });
   });
