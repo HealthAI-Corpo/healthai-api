@@ -24,11 +24,11 @@ export class Exercice {
   @Index()
   typeExercice: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  musclePrincipal: string;
+  @Column({ type: 'varchar', length: 100, nullable: true, name: 'muscles_principaux' })
+  musclesPrincipaux: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  muscleSecondaire: string;
+  @Column({ type: 'varchar', length: 100, nullable: true, name: 'muscles_secondaires' })
+  musclesSecondaires: string;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
   equipement: string;

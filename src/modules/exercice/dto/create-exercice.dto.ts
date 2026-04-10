@@ -13,11 +13,17 @@ export class CreateExerciceDto {
   @Length(1, 100)
   typeExercice?: string;
 
-  @ApiPropertyOptional({ example: 'Pectoraux' })
+  @ApiPropertyOptional({ example: 'Pectoraux, Triceps' })
   @IsOptional()
   @IsString()
   @Length(1, 100)
-  muscleCible?: string;
+  musclesPrincipaux?: string;
+
+  @ApiPropertyOptional({ example: 'Deltoïdes' })
+  @IsOptional()
+  @IsString()
+  @Length(1, 100)
+  musclesSecondaires?: string;
 
   @ApiPropertyOptional({ example: 'Poids du corps' })
   @IsOptional()

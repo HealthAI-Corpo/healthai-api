@@ -56,7 +56,7 @@ export class HistoriqueSeanceExercice {
 
   @Column({
     type: 'decimal',
-    precision: 4,
+    precision: 5,
     scale: 1,
     nullable: true,
     name: 'pourcentage_gras',

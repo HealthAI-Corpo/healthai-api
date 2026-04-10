@@ -58,6 +58,15 @@ export class Aliment {
   })
   cholesterolMg: number;
 
+  @Column({
+    type: 'decimal',
+    precision: 7,
+    scale: 2,
+    nullable: true,
+    name: 'eau_ml',
+  })
+  eauMl: number;
+
   @Column({ type: 'varchar', length: 20, nullable: true, name: 'unite_mesure' })
   uniteMesure: string;
 
