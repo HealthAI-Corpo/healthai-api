@@ -25,6 +25,7 @@ import { ProfilSanteModule } from './modules/profil-sante/profil-sante.module';
 // Modules datasets
 import { RecommandationsRegimeModule } from './modules/datasets/recommandations-regime/recommandations-regime.module';
 import { HistoriqueSeanceExerciceModule } from './modules/datasets/historique-seance-exercice/historique-seance-exercice.module';
+import { EtlLogModule } from './modules/etl-log/etl-log.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { HistoriqueSeanceExerciceModule } from './modules/datasets/historique-se
     // Modules datasets
     RecommandationsRegimeModule,
     HistoriqueSeanceExerciceModule,
+    EtlLogModule,
   ],
   controllers: [AppController, HealthController],
   providers: [

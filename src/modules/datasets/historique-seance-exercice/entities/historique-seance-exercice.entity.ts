@@ -56,7 +56,7 @@ export class HistoriqueSeanceExercice {
 
   @Column({
     type: 'decimal',
-    precision: 4,
+    precision: 5,
     scale: 1,
     nullable: true,
     name: 'pourcentage_gras',
@@ -65,12 +65,12 @@ export class HistoriqueSeanceExercice {
 
   @Column({
     type: 'decimal',
-    precision: 4,
-    scale: 1,
+    precision: 7,
+    scale: 2,
     nullable: true,
-    name: 'consommation_eau_l',
+    name: 'consommation_eau_ml',
   })
-  consommationEauL: number;
+  consommationEauMl: number;
 
   @Column({ type: 'int', nullable: true, name: 'frequence_sport_jour_semaine' })
   frequenceSportJourSemaine: number;

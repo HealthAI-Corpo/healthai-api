@@ -13,6 +13,7 @@ import { ProfilSante } from '../modules/profil-sante/entities/profil-sante.entit
 // Entités datasets
 import { RecommandationsRegime } from '../modules/datasets/recommandations-regime/entities/recommandations-regime.entity';
 import { HistoriqueSeanceExercice } from '../modules/datasets/historique-seance-exercice/entities/historique-seance-exercice.entity';
+import { EtlLog } from '../modules/etl-log/entities/etl-log.entity';
 
 config({ path: '.env.local' });
 config({ path: '.env' });
@@ -37,6 +38,7 @@ const AppDataSource = new DataSource({
     // Entités datasets
     RecommandationsRegime,
     HistoriqueSeanceExercice,
+    EtlLog,
   ],
   migrations: ['src/database/migrations/*.ts', 'dist/database/migrations/*.js'],
 });

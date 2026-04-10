@@ -26,7 +26,7 @@ export class LogSeance {
     type: 'decimal',
     precision: 5,
     scale: 1,
-    nullable: true,
+    nullable: false,
     name: 'duree_minutes',
   })
   dureeMinutes: number;
@@ -35,7 +35,7 @@ export class LogSeance {
     type: 'decimal',
     precision: 6,
     scale: 1,
-    nullable: true,
+    nullable: false,
     name: 'calorie_brulee',
   })
   calorieBrulee: number;

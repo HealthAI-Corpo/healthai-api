@@ -21,7 +21,7 @@ export class LogSante {
     type: 'decimal',
     precision: 5,
     scale: 2,
-    nullable: true,
+    nullable: false,
     name: 'poids_kg',
   })
   poidsKg: number;
@@ -44,7 +44,7 @@ export class LogSante {
   })
   imcActuel: number;
 
-  @Column({ type: 'int', nullable: true, name: 'bpm_moyen_journee' })
+  @Column({ type: 'int', nullable: false, name: 'bpm_moyen_journee' })
   bpmMoyenJournee: number;
 
   @Column({ type: 'int', nullable: true, name: 'bpm_repos' })
