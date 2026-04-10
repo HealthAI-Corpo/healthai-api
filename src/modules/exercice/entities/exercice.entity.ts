@@ -18,16 +18,16 @@ export class Exercice {
   @Column({
     type: 'varchar',
     length: 100,
-    nullable: true,
+    nullable: false,
     name: 'type_exercice',
   })
   @Index()
   typeExercice: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true, name: 'muscles_principaux' })
+  @Column({ type: 'varchar', length: 200, nullable: true, name: 'muscles_principaux' })
   musclesPrincipaux: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true, name: 'muscles_secondaires' })
+  @Column({ type: 'varchar', length: 200, nullable: true, name: 'muscles_secondaires' })
   musclesSecondaires: string;
 
   @Column({ type: 'varchar', length: 100, nullable: true })

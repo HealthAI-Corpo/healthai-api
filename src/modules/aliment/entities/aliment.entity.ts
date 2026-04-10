@@ -22,16 +22,16 @@ export class Aliment {
   @Index()
   typeRepas: string;
 
-  @Column({ type: 'decimal', precision: 6, scale: 1, nullable: true })
+  @Column({ type: 'decimal', precision: 6, scale: 1, nullable: false, default: 0 })
   calories: number;
 
-  @Column({ type: 'decimal', precision: 4, scale: 1, nullable: true })
+  @Column({ type: 'decimal', precision: 4, scale: 1, nullable: false, default: 0 })
   proteines: number;
 
-  @Column({ type: 'decimal', precision: 4, scale: 1, nullable: true })
+  @Column({ type: 'decimal', precision: 4, scale: 1, nullable: false, default: 0 })
   lipides: number;
 
-  @Column({ type: 'decimal', precision: 4, scale: 1, nullable: true })
+  @Column({ type: 'decimal', precision: 4, scale: 1, nullable: false, default: 0 })
   glucides: number;
 
   @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
@@ -67,7 +67,7 @@ export class Aliment {
   })
   eauMl: number;
 
-  @Column({ type: 'varchar', length: 20, nullable: true, name: 'unite_mesure' })
+  @Column({ type: 'varchar', length: 20, nullable: false, name: 'unite_mesure', default: '100g' })
   uniteMesure: string;
 
   @OneToMany(() => LogAliment, (logAliment) => logAliment.aliment, {

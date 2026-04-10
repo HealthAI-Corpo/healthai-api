@@ -97,7 +97,7 @@ export class RecommandationsRegime {
   @Column({
     type: 'decimal',
     precision: 4,
-    scale: 2,
+    scale: 1,
     nullable: true,
     name: 'score_desequilibre_nutriment',
   })

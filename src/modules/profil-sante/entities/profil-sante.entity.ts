@@ -21,12 +21,12 @@ export class ProfilSante {
     type: 'decimal',
     precision: 5,
     scale: 2,
-    nullable: true,
+    nullable: false,
     name: 'poids_kg',
   })
   poidsKg: number;
 
-  @Column({ type: 'int', nullable: true, name: 'taille_cm' })
+  @Column({ type: 'int', nullable: false, name: 'taille_cm' })
   tailleCm: number;
 
   @Column({ type: 'decimal', precision: 4, scale: 1, nullable: true })
