@@ -59,4 +59,15 @@ export class AuthService {
       where: { idUtilisateur: payload.sub },
     });
   }
+
+  async validateToken(token: string): Promise<JwtPayload | null> {
+    try {
+      return await this.jwtService.verifyAsync<JwtPayload>(token, {
+        issuer: this.configService.getOrThrow<string>('JWT_ISSUER'),
+        audience: this.configService.getOrThrow<string>('JWT_AUDIENCE'),
+      });
+    } catch {
+      return null;
+    }
+  }
 }
