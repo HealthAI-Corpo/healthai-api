@@ -17,6 +17,7 @@ function buildContext(
     getClass: jest.fn(),
     switchToHttp: jest.fn().mockReturnValue({
       getRequest: jest.fn().mockReturnValue({
+        url: '/api/some-endpoint',
         headers: apiKeyHeader ? { 'x-api-key': apiKeyHeader } : {},
       }),
     }),
