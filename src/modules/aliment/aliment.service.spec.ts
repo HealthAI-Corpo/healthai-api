@@ -68,7 +68,9 @@ describe('AlimentService', () => {
       mockRepo.findOne.mockResolvedValue(mockAliment);
       const result = await service.findOne(1);
       expect(result).toEqual(mockAliment);
-      expect(mockRepo.findOne).toHaveBeenCalledWith({ where: { idAliment: 1 } });
+      expect(mockRepo.findOne).toHaveBeenCalledWith({
+        where: { idAliment: 1 },
+      });
     });
 
     it('should throw NotFoundException when not found', async () => {
@@ -105,7 +107,9 @@ describe('AlimentService', () => {
 
     it('should throw NotFoundException when aliment does not exist', async () => {
       mockRepo.findOne.mockResolvedValue(null);
-      await expect(service.update(999, { nom: 'X' })).rejects.toThrow(NotFoundException);
+      await expect(service.update(999, { nom: 'X' })).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 

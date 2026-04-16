@@ -112,7 +112,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
-  
+
   // Setup Swagger UI at /doc
   SwaggerModule.setup('doc', app, document, {
     customSiteTitle: 'HealthAI API Docs',

@@ -72,8 +72,8 @@ export class AuthController {
   @ApiOperation({
     summary: 'Validation de token (Traefik forward-auth)',
     description:
-      "Endpoint interne appelé par Traefik avant chaque requête protégée. " +
-      "Valide le JWT du header Authorization et injecte X-User-Id + X-User-Role " +
+      'Endpoint interne appelé par Traefik avant chaque requête protégée. ' +
+      'Valide le JWT du header Authorization et injecte X-User-Id + X-User-Role ' +
       "dans la réponse pour transmission à l'upstream.",
   })
   @ApiResponse({
@@ -86,7 +86,9 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ valid: true }> {
     if (!authHeader?.startsWith('Bearer ')) {
-      throw new UnauthorizedException('Missing or malformed Authorization header');
+      throw new UnauthorizedException(
+        'Missing or malformed Authorization header',
+      );
     }
     const token = authHeader.substring(7);
     const payload = await this.authService.validateToken(token);

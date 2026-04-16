@@ -6,7 +6,7 @@ import {
   Min,
   Max,
 } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export class CreateRecommandationsRegimeDto {

@@ -39,7 +39,10 @@ describe('AuthController', () => {
 
   describe('GET /auth/validate', () => {
     it('should return 200 and inject headers when token is valid', async () => {
-      authServiceMock.validateToken.mockResolvedValue({ sub: 42, email: 'user@example.com' });
+      authServiceMock.validateToken.mockResolvedValue({
+        sub: 42,
+        email: 'user@example.com',
+      });
 
       const res = await request(app.getHttpServer())
         .get('/auth/validate')
