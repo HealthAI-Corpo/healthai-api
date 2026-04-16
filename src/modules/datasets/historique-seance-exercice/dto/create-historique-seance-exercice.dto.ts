@@ -95,12 +95,12 @@ export class CreateHistoriqueSeanceExerciceDto {
   @Max(100)
   pourcentageGras?: number;
 
-  @ApiPropertyOptional({ example: 1.5 })
+  @ApiPropertyOptional({ example: 1500.0 })
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
   @Min(0)
-  consommationEauL?: number;
+  consommationEauMl?: number;
 
   @ApiPropertyOptional({ example: 4 })
   @IsOptional()

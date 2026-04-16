@@ -18,7 +18,7 @@ export class Exercice {
   @Column({
     type: 'varchar',
     length: 100,
-    nullable: true,
+    nullable: false,
     name: 'type_exercice',
   })
   @Index()

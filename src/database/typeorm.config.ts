@@ -13,6 +13,7 @@ import { ProfilSante } from '../modules/profil-sante/entities/profil-sante.entit
 // Entités datasets
 import { RecommandationsRegime } from '../modules/datasets/recommandations-regime/entities/recommandations-regime.entity';
 import { HistoriqueSeanceExercice } from '../modules/datasets/historique-seance-exercice/entities/historique-seance-exercice.entity';
+import { EtlLog } from '../modules/etl-log/entities/etl-log.entity';
 
 export function buildTypeOrmOptions(
   configService: ConfigService,
@@ -35,6 +36,7 @@ export function buildTypeOrmOptions(
       // Entités datasets
       RecommandationsRegime,
       HistoriqueSeanceExercice,
+      EtlLog,
     ],
     synchronize: false,
     migrationsRun,

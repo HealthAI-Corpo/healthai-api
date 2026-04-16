@@ -24,16 +24,14 @@ export class CreateUtilisateurDto {
   @Length(1, 255)
   email: string;
 
-  @ApiPropertyOptional({ example: '1990-05-15' })
-  @IsOptional()
+  @ApiProperty({ example: '1990-05-15' })
   @IsDateString()
-  dateDeNaissance?: Date;
+  dateDeNaissance: Date;
 
-  @ApiPropertyOptional({ example: 'Homme' })
-  @IsOptional()
+  @ApiProperty({ example: 'Homme' })
   @IsString()
   @Length(1, 50)
-  genre?: string;
+  genre: string;
 
   @ApiPropertyOptional({ example: 'Premium' })
   @IsOptional()
