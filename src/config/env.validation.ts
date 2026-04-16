@@ -15,6 +15,9 @@ export const envValidationSchema = Joi.object({
   API_KEY: Joi.string().min(32).required(),
   FRONTEND_ORIGIN: Joi.string().min(3).required(),
   FRONTEND_CLIENT_ID: Joi.string().min(8).required(),
-  DEV_DEFAULT_USER_EMAIL: Joi.string().email({ tlds: { allow: false } }).allow('').optional(),
+  DEV_DEFAULT_USER_EMAIL: Joi.string()
+    .email({ tlds: { allow: false } })
+    .allow('')
+    .optional(),
   DEV_DEFAULT_USER_PASSWORD: Joi.string().min(8).allow('').optional(),
 }).unknown(true); // Allow unknown env variables

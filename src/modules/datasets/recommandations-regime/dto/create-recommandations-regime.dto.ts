@@ -6,13 +6,15 @@ import {
   Min,
   Max,
 } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export class CreateRecommandationsRegimeDto {
-  @ApiProperty({ example: 'REC001' })
-  @IsString()
-  idDatasetRecommandationsRegime: string;
+  @ApiPropertyOptional({ example: 1 })
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  idDatasetRecommandationsRegime?: number;
 
   @ApiPropertyOptional({ example: 45 })
   @IsOptional()

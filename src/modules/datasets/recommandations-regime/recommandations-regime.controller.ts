@@ -8,6 +8,7 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  ParseIntPipe,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -84,7 +85,7 @@ export class RecommandationsRegimeController {
     status: 404,
     description: 'Entrée introuvable',
   })
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.recommandationsRegimeService.findOne(id);
   }
 
@@ -109,7 +110,7 @@ export class RecommandationsRegimeController {
     description: 'Entrée introuvable',
   })
   update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateRecommandationsRegimeDto: UpdateRecommandationsRegimeDto,
   ) {
     return this.recommandationsRegimeService.update(
@@ -138,7 +139,7 @@ export class RecommandationsRegimeController {
     status: 404,
     description: 'Entrée introuvable',
   })
-  remove(@Param('id') id: string) {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.recommandationsRegimeService.remove(id);
   }
 }

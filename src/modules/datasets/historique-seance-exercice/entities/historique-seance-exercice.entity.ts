@@ -1,8 +1,8 @@
-import { Entity, PrimaryColumn, Column, Index } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
 
 @Entity('dataset_historique_seance_exercice')
 export class HistoriqueSeanceExercice {
-  @PrimaryColumn({ type: 'int', name: 'id_dataset_historique_seance_exercice' })
+  @PrimaryGeneratedColumn({ name: 'id_dataset_historique_seance_exercice' })
   idDatasetHistoriqueSeanceExercice: number;
 
   @Column({ type: 'int', nullable: true })

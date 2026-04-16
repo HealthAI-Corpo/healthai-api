@@ -18,7 +18,8 @@ import { EtlLog } from '../modules/etl-log/entities/etl-log.entity';
 export function buildTypeOrmOptions(
   configService: ConfigService,
 ): TypeOrmModuleOptions {
-  const migrationsRun = configService.get<string>('TYPEORM_RUN_MIGRATIONS', 'true') === 'true';
+  const migrationsRun =
+    configService.get<string>('TYPEORM_RUN_MIGRATIONS', 'true') === 'true';
 
   return {
     type: 'postgres',

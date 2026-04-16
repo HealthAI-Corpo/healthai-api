@@ -1,9 +1,9 @@
-import { Entity, PrimaryColumn, Column, Index } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
 
-@Entity('dataset_recommandations_regime')
+@Entity('dataset_recommendations_regime')
 export class RecommandationsRegime {
-  @PrimaryColumn({ type: 'varchar', name: 'id_dataset_recommandations_regime' })
-  idDatasetRecommandationsRegime: string;
+  @PrimaryGeneratedColumn({ name: 'id_dataset_recommendations_regime' })
+  idDatasetRecommandationsRegime: number;
 
   @Column({ type: 'int', nullable: true })
   age: number;
@@ -50,7 +50,7 @@ export class RecommandationsRegime {
     precision: 6,
     scale: 2,
     nullable: true,
-    name: 'tension_arterielle_mmHg',
+    name: 'tension_arterielle_mmhg',
   })
   tensionArterielleMMHg: number;
 
@@ -99,7 +99,7 @@ export class RecommandationsRegime {
     precision: 4,
     scale: 1,
     nullable: true,
-    name: 'score_desequilibre_nutriment',
+    name: 'score_desiquilibre_nutriment',
   })
   scoreDesequilibreNutriment: number;
 
