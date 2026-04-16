@@ -25,7 +25,7 @@ export class RecommandationsRegimeService {
     return this.recommandationsRegimeRepository.find();
   }
 
-  async findOne(id: string): Promise<RecommandationsRegime> {
+  async findOne(id: number): Promise<RecommandationsRegime> {
     const recommandation = await this.recommandationsRegimeRepository.findOne({
       where: { idDatasetRecommandationsRegime: id },
     });
@@ -40,7 +40,7 @@ export class RecommandationsRegimeService {
   }
 
   async update(
-    id: string,
+    id: number,
     updateRecommandationsRegimeDto: UpdateRecommandationsRegimeDto,
   ): Promise<RecommandationsRegime> {
     const recommandation = await this.findOne(id);
@@ -48,7 +48,7 @@ export class RecommandationsRegimeService {
     return this.recommandationsRegimeRepository.save(recommandation);
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     const recommandation = await this.findOne(id);
     await this.recommandationsRegimeRepository.remove(recommandation);
   }

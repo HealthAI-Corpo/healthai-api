@@ -10,7 +10,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiBody } from '@nestjs/swagger';
-import { Response } from 'express';
+import type { Response } from 'express';
 
 import { Public } from './decorators/public.decorator';
 import { AuthService } from './auth.service';
