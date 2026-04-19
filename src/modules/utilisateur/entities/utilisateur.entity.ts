@@ -27,10 +27,10 @@ export class Utilisateur {
   @Index()
   email: string;
 
-  @Column({ type: 'date', nullable: true, name: 'date_de_naissance' })
+  @Column({ type: 'date', nullable: false, name: 'date_de_naissance' })
   dateDeNaissance: Date;
 
-  @Column({ type: 'varchar', length: 50, nullable: true })
+  @Column({ type: 'varchar', length: 50, nullable: false })
   genre: string;
 
   @Column({

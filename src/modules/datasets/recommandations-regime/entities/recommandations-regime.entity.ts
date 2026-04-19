@@ -87,7 +87,7 @@ export class RecommandationsRegime {
 
   @Column({
     type: 'decimal',
-    precision: 4,
+    precision: 5,
     scale: 2,
     nullable: true,
     name: 'adherence_regime',
@@ -97,7 +97,7 @@ export class RecommandationsRegime {
   @Column({
     type: 'decimal',
     precision: 4,
-    scale: 2,
+    scale: 1,
     nullable: true,
     name: 'score_desiquilibre_nutriment',
   })
