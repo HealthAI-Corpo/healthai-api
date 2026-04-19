@@ -1,153 +1,142 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# healthai-api
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend REST API de la plateforme HealthAI Coach — gestion des utilisateurs, données de santé et datasets IA.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Stack technique
 
-## Description
+| Couche | Technologie |
+|--------|------------|
+| Framework | NestJS 11.x (Express) |
+| Langage | TypeScript 5.7 |
+| ORM | TypeORM 0.3 (lecture seule — schéma géré par healthai-infra) |
+| Base de données | PostgreSQL 15 |
+| Auth | Passport JWT + bcrypt |
+| Validation | class-validator · class-transformer · Joi |
+| Documentation | Swagger / OpenAPI (`/doc`) |
+| Monitoring | NestJS Terminus (health check) |
+| Tests | Jest · Supertest |
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Endpoints
 
-## API usage
+| Groupe | Routes |
+|--------|--------|
+| Auth | `POST /auth/login` |
+| Health | `GET /health` |
+| Utilisateurs | `CRUD /utilisateurs` |
+| Aliments | `CRUD /aliments` |
+| Exercices | `CRUD /exercices` |
+| Logs alimentaires | `CRUD /logs-aliment` |
+| Logs séances | `CRUD /logs-seance` |
+| Logs santé | `CRUD /logs-sante` |
+| Profils santé | `CRUD /profils-sante` |
+| Dataset régimes | `CRUD /datasets/recommandations-regime` |
+| Dataset exercices | `CRUD /datasets/historique-seance-exercice` |
 
-- Swagger UI: `http://localhost:3001/doc`
-- Detailed usage and curl examples: [`../../docs/API_USAGE.md`](../../docs/API_USAGE.md)
+Documentation interactive complète : `http://localhost:3001/doc`
 
-Security headers required on every request:
+## Sécurité
 
-- `x-api-key`
-- `x-client-id`
+Toutes les routes (sauf `POST /auth/login` et `GET /health`) requièrent :
 
-JWT-protected routes also require:
+```http
+x-api-key: <API_KEY>
+x-client-id: <FRONTEND_CLIENT_ID>
+Authorization: Bearer <jwt_token>   ← routes protégées uniquement
+```
 
-- `Authorization: Bearer <access_token>`
-
-## Project setup
+## Installation
 
 ```bash
-$ npm install
+npm install
 ```
 
-## TypeORM integration
+## Variables d'environnement
 
-The API uses TypeORM with PostgreSQL and provides migration scripts through a
-dedicated DataSource (`src/database/typeorm.datasource.ts`).
+```env
+DATABASE_URL=postgresql://healthai:password@localhost:5432/healthai_db
+JWT_SECRET=<min 32 chars>
+JWT_ISSUER=healthai-api
+JWT_AUDIENCE=healthai-web
+JWT_EXPIRES_IN=3600s
+API_KEY=<min 32 chars>
+FRONTEND_ORIGIN=http://localhost:3000
+FRONTEND_CLIENT_ID=healthai-admin-front
+PORT=3001
+NODE_ENV=development
+```
+
+## Scripts
 
 ```bash
-# generate migration from entity changes
-$ npm run migration:generate
+npm run start:dev        # Développement (watch mode)
+npm run start:prod       # Production
+npm run build            # Compilation TypeScript
 
-# create empty migration file
-$ npm run migration:create
+npm run test             # Tests unitaires (Jest)
+npm run test:e2e         # Tests end-to-end
+npm run test:cov         # Couverture de tests
 
-# apply migrations
-$ npm run migration:run
+npm run lint             # ESLint
+npm run format           # Prettier
 
-# revert last migration
-$ npm run migration:revert
+npm run migration:generate   # Générer une migration depuis les entités
+npm run migration:create     # Créer un fichier de migration vide
+npm run migration:run        # Appliquer les migrations
+npm run migration:revert     # Annuler la dernière migration
+
+npm run seed:dev-account     # Créer un compte dev (développement uniquement)
 ```
 
-## Apply migratioons on docker compose up
+> **Note schéma** : le schéma de base est géré par golang-migrate dans `healthai-infra/db/migrations/`.  
+> TypeORM est configuré en lecture seule (`TYPEORM_RUN_MIGRATIONS=false` en production).  
+> `migration:run` est réservé au développement local.
+
+## Démarrage local
 
 ```bash
-# from repository root
-docker compose up --build api
-```
-```bash 
-docker compose exec api npm run migration:run
+# 1. Démarrer PostgreSQL (via healthai-infra)
+docker compose up -d db db-migrator
+
+# 2. Copier et remplir les variables
+cp .env.example .env
+
+# 3. Créer un compte de test
+npm run seed:dev-account
+
+# 4. Lancer l'API
+npm run start:dev
+# → http://localhost:3001
+# → http://localhost:3001/doc  (Swagger)
 ```
 
-### create a dev account 
-```
-docker compose exec api npm run seed:dev-account
-```
+## Docker
 
-## Compile and run the project
+L'image est buildée et publiée automatiquement sur GHCR via CI :
 
 ```bash
-# development
-$ npm run start
+# Build local
+docker build -t healthai-api:local .
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-
-# seed default dev account (create/update)
-$ npm run seed:dev-account
+# Via healthai-infra (recommandé)
+docker compose up -d healthai-api
 ```
 
-The `seed:dev-account` script is intended for development only. It uses
-`DEV_DEFAULT_USER_EMAIL` and `DEV_DEFAULT_USER_PASSWORD` from your API env file
-to create the account, or update its password if it already exists.
+## Structure
 
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
 ```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+src/
+├── auth/               # JWT strategy, guards, login endpoint
+├── database/           # TypeORM datasource, migrations
+├── modules/
+│   ├── utilisateurs/
+│   ├── aliments/
+│   ├── exercices/
+│   ├── logs-aliment/
+│   ├── logs-seance/
+│   ├── logs-sante/
+│   ├── profils-sante/
+│   └── datasets/
+│       ├── recommandations-regime/
+│       └── historique-seance-exercice/
+└── main.ts
 ```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
