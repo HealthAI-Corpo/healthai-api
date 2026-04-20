@@ -50,7 +50,7 @@ export class RecommandationsRegime {
     precision: 6,
     scale: 2,
     nullable: true,
-    name: 'tension_arterielle_mmhg',
+    name: '"tension_arterielle_mmHg"',
   })
   tensionArterielleMMHg: number;
 

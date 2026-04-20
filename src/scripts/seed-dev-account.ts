@@ -43,6 +43,8 @@ async function seedDevAccount(): Promise<void> {
         prenom: 'Admin',
         email,
         motDePasseHash: hashedPassword,
+        dateDeNaissance: new Date('1990-01-01'),
+        genre: 'Male',
       }),
     );
     logger.log(`Created default dev account "${email}"`);

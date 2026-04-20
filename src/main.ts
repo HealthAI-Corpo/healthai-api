@@ -40,7 +40,7 @@ async function bootstrap() {
       callback(new Error('CORS policy: origin not allowed'));
     },
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization','x-api-key', 'x-client-id'],
   });
 
   app.useGlobalPipes(
