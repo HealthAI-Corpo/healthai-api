@@ -50,7 +50,7 @@ export class RecommandationsRegime {
     precision: 6,
     scale: 2,
     nullable: true,
-    name: '"tension_arterielle_mmHg"',
+    name: 'tension_arterielle_mmhg',
   })
   tensionArterielleMMHg: number;
 
@@ -103,6 +103,6 @@ export class RecommandationsRegime {
   })
   scoreDesequilibreNutriment: number;
 
-  @Column({ type: 'varchar', nullable: true, name: 'recommandation_regime' })
+  @Column({ type: 'varchar', nullable: true, name: 'recommendation_regime' })
   recommandationRegime: string;
 }
