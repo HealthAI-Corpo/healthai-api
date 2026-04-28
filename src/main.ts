@@ -56,7 +56,7 @@ async function bootstrap() {
     .setDescription(
       '🏥 API REST pour la gestion de données de santé et bien-être\n\n' +
         '**Fonctionnalités principales:**\n' +
-        '- Authentification JWT sécurisée\n' +
+        '- Authentification JWT Zitadel (OIDC)\n' +
         '- Gestion utilisateurs et profils santé\n' +
         '- Catalogues aliments et exercices\n' +
         '- Journaux alimentaires et séances\n' +
@@ -65,7 +65,7 @@ async function bootstrap() {
         '**Sécurité:**\n' +
         '- API Key globale (header `x-api-key`)\n' +
         '- Client ID validation (header `x-client-id`)\n' +
-        '- JWT Bearer tokens',
+        '- JWT Bearer tokens (émis par Zitadel)',
     )
     .setVersion('1.0')
     .addBearerAuth(
@@ -73,7 +73,7 @@ async function bootstrap() {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
-        description: 'Entrez votre JWT token obtenu via POST /auth/login',
+        description: 'Entrez un access token JWT émis par Zitadel',
       },
       'JWT-auth',
     )

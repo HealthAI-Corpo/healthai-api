@@ -17,25 +17,17 @@ L'API utilise 3 niveaux de sécurité :
 
 1. **API Key** (header `x-api-key`) - Globale, requise sur toutes les routes
 2. **Client ID** (header `x-client-id`) - Validation frontend
-3. **JWT Bearer Token** - Authentification utilisateur
+3. **JWT Bearer Token (Zitadel)** - Authentification utilisateur
 
-### Obtenir un JWT Token
+### JWT via Zitadel
 
 ```http
-POST /auth/login
-Content-Type: application/json
+Les utilisateurs s'authentifient via Zitadel (OIDC/PKCE côté frontend) puis envoient l'access token à l'API.
 
-{
-  "email": "user@example.com",
-  "password": "password123"
-}
-```
-
-**Réponse:**
-```json
-{
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
+Validation interne (forward-auth Traefik) :
+```http
+GET /auth/validate
+Authorization: Bearer <zitadel_access_token>
 ```
 
 **Utilisation du token:**
@@ -51,7 +43,7 @@ x-client-id: your-client-id
 ## 📋 Endpoints disponibles
 
 ### Authentification
-- `POST /auth/login` - Connexion utilisateur (retourne JWT)
+- `GET /auth/validate` - Validation JWT Zitadel (forward-auth)
 
 ### Health Check
 - `GET /health` - Status de l'API et DB (public, pas d'auth requise)
@@ -233,11 +225,11 @@ Assurez-vous que votre fichier `.env` contient :
 # Database
 DATABASE_URL=postgresql://user:password@localhost:5432/healthai
 
-# JWT
-JWT_SECRET=your-secret-key-min-32-chars
-JWT_ISSUER=healthai-api
-JWT_AUDIENCE=healthai-client
-JWT_EXPIRES_IN=3600
+# Zitadel OIDC
+ZITADEL_ISSUER=https://your-instance.zitadel.cloud
+ZITADEL_AUDIENCE=healthai-api
+# optionnel
+ZITADEL_JWKS_URI=https://your-instance.zitadel.cloud/oauth/v2/keys
 
 # API Security
 API_KEY=your-api-key-min-32-chars

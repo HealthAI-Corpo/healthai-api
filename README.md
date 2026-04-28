@@ -10,7 +10,7 @@ Backend REST API de la plateforme HealthAI Coach — gestion des utilisateurs, d
 | Langage | TypeScript 5.7 |
 | ORM | TypeORM 0.3 (lecture seule — schéma géré par healthai-infra) |
 | Base de données | PostgreSQL 15 |
-| Auth | Passport JWT + bcrypt |
+| Auth | Zitadel OIDC (JWT Bearer) + bcrypt |
 | Validation | class-validator · class-transformer · Joi |
 | Documentation | Swagger / OpenAPI (`/doc`) |
 | Monitoring | NestJS Terminus (health check) |
@@ -20,7 +20,7 @@ Backend REST API de la plateforme HealthAI Coach — gestion des utilisateurs, d
 
 | Groupe | Routes |
 |--------|--------|
-| Auth | `POST /auth/login` |
+| Auth | `GET /auth/validate` (forward-auth) |
 | Health | `GET /health` |
 | Utilisateurs | `CRUD /utilisateurs` |
 | Aliments | `CRUD /aliments` |
@@ -36,13 +36,15 @@ Documentation interactive complète : `http://localhost:3001/doc`
 
 ## Sécurité
 
-Toutes les routes (sauf `POST /auth/login` et `GET /health`) requièrent :
+Toutes les routes (sauf `GET /auth/validate` et `GET /health`) requièrent :
 
 ```http
 x-api-key: <API_KEY>
 x-client-id: <FRONTEND_CLIENT_ID>
 Authorization: Bearer <jwt_token>   ← routes protégées uniquement
 ```
+
+Les JWT doivent être émis par **Zitadel** (OIDC). L'API ne fournit plus d'endpoint de login local.
 
 ## Installation
 
@@ -54,10 +56,10 @@ npm install
 
 ```env
 DATABASE_URL=postgresql://healthai:password@localhost:5432/healthai_db
-JWT_SECRET=<min 32 chars>
-JWT_ISSUER=healthai-api
-JWT_AUDIENCE=healthai-web
-JWT_EXPIRES_IN=3600s
+ZITADEL_ISSUER=https://your-instance.zitadel.cloud
+ZITADEL_AUDIENCE=healthai-api
+# optionnel
+ZITADEL_JWKS_URI=https://your-instance.zitadel.cloud/oauth/v2/keys
 API_KEY=<min 32 chars>
 FRONTEND_ORIGIN=http://localhost:3000
 FRONTEND_CLIENT_ID=healthai-admin-front
@@ -125,7 +127,7 @@ docker compose up -d healthai-api
 
 ```
 src/
-├── auth/               # JWT strategy, guards, login endpoint
+├── auth/               # Validation JWT Zitadel + endpoint forward-auth
 ├── database/           # TypeORM datasource, migrations
 ├── modules/
 │   ├── utilisateurs/

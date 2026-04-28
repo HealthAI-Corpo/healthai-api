@@ -38,10 +38,9 @@ jobs:
           --health-retries 5
     env:
       DATABASE_URL: postgresql://healthai:healthai_secret@localhost:5432/healthai_db
-      JWT_SECRET: test_jwt_secret_32_chars_minimum_xx
-      JWT_EXPIRES_IN: 3600s
-      JWT_ISSUER: healthai-api
-      JWT_AUDIENCE: healthai-web
+      ZITADEL_ISSUER: https://zitadel.example.com
+      ZITADEL_AUDIENCE: healthai-web
+      ZITADEL_JWKS_URI: https://zitadel.example.com/oauth/v2/keys
       API_KEY: test_api_key_32_chars_minimum_xxxxx
       FRONTEND_CLIENT_ID: healthai-web-client
       FRONTEND_ORIGIN: http://localhost:3000

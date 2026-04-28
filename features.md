@@ -6,15 +6,15 @@ API REST NestJS pour la gestion de données de santé et bien-être avec TypeScr
 
 ## 🔐 Authentification & Sécurité
 
-### JWT Authentication
-- `POST /auth/login` - Authentification email/password, retourne un JWT
-- Token configurable (expiration, issuer, audience)
-- Hash bcrypt pour les mots de passe
+### Zitadel JWT Authentication
+- `GET /auth/validate` - Validation de JWT Zitadel (forward-auth)
+- Vérification de signature via JWKS Zitadel
+- Validation issuer/audience configurable
 
 ### Sécurité Multi-Couches
 - **API Key Guard** (`x-api-key` header) - Sécurité globale, timing-safe
 - **Client ID Guard** (`x-client-id` header) - Validation frontend
-- **JWT Guard** - Protection routes avec Passport JWT
+- **Bearer JWT Zitadel** - Authentification utilisateur via fournisseur OIDC externe
 - `@Public()` decorator pour routes publiques
 
 ---
@@ -117,8 +117,8 @@ API REST NestJS pour la gestion de données de santé et bien-être avec TypeScr
 
 ### Variables Requises
 - `DATABASE_URL` - PostgreSQL connection
-- `JWT_SECRET` (min 32 chars)
-- `JWT_ISSUER`, `JWT_AUDIENCE`
+- `ZITADEL_ISSUER` (URL issuer)
+- `ZITADEL_AUDIENCE`
 - `API_KEY` (min 32 chars)
 - `FRONTEND_ORIGIN`
 - `FRONTEND_CLIENT_ID` (min 8 chars)
@@ -126,7 +126,7 @@ API REST NestJS pour la gestion de données de santé et bien-être avec TypeScr
 ### Variables Optionnelles
 - `NODE_ENV` (default: development)
 - `PORT` (default: 3001)
-- `JWT_EXPIRES_IN` (default: 3600)
+- `ZITADEL_JWKS_URI` (optionnel)
 
 ---
 
@@ -171,7 +171,7 @@ API REST NestJS pour la gestion de données de santé et bien-être avec TypeScr
 
 **Core:** NestJS 11.x, TypeScript 5.7.x, Express  
 **Database:** PostgreSQL, TypeORM 0.3.x  
-**Auth:** Passport JWT, bcrypt  
+**Auth:** Zitadel OIDC (JWT Bearer), bcrypt  
 **Validation:** class-validator, class-transformer, Joi  
 **Docs:** Swagger/OpenAPI  
 **Monitoring:** Terminus  
