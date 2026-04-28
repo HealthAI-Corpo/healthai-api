@@ -6,6 +6,10 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { normalizeOrigin } from './common/cors-origin.util';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import {
+  buildRabbitMqOptions,
+  getRabbitMqSettings,
+} from './rabbitmq/rabbitmq.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -13,6 +17,7 @@ async function bootstrap() {
   });
 
   const configService = app.get(ConfigService);
+  const rabbitMqSettings = getRabbitMqSettings(configService);
   const allowedOrigins = configService
     .getOrThrow<string>('FRONTEND_ORIGIN')
     .split(',')
@@ -120,6 +125,14 @@ async function bootstrap() {
     customCss: '.swagger-ui .topbar { display: none }',
     jsonDocumentUrl: '/doc-json', // This makes /doc-json public automatically
   });
+
+  if (rabbitMqSettings.enabled) {
+    app.connectMicroservice(buildRabbitMqOptions(rabbitMqSettings));
+    await app.startAllMicroservices();
+    console.log(
+      `RabbitMQ transport connected on queue "${rabbitMqSettings.queue}"`,
+    );
+  }
 
   const port = configService.get<number>('PORT', 3000);
   // Bind to 0.0.0.0 in Docker so the container port mapping works reliably

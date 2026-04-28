@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TerminusModule } from '@nestjs/terminus';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -12,6 +13,7 @@ import { ClientIdGuard } from './auth/guards/client-id.guard';
 import { envValidationSchema } from './config/env.validation';
 import { buildTypeOrmOptions } from './database/typeorm.config';
 import { HealthController } from './health/health.controller';
+import { RabbitMqModule } from './rabbitmq/rabbitmq.module';
 
 // Modules métier
 import { UtilisateurModule } from './modules/utilisateur/utilisateur.module';
@@ -34,12 +36,23 @@ import { EtlLogModule } from './modules/etl-log/etl-log.module';
       envFilePath: ['.env.local', '.env'],
       validationSchema: envValidationSchema,
     }),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => [
+        {
+          ttl: configService.get<number>('RATE_LIMIT_TTL_MS', 60_000),
+          limit: configService.get<number>('RATE_LIMIT_MAX', 100),
+        },
+      ],
+    }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) =>
         buildTypeOrmOptions(configService),
       inject: [ConfigService],
     }),
+    RabbitMqModule,
     TerminusModule,
     AuthModule,
     // Modules métier
@@ -65,6 +78,10 @@ import { EtlLogModule } from './modules/etl-log/etl-log.module';
     {
       provide: APP_GUARD,
       useClass: ClientIdGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
   ],
 })

@@ -14,6 +14,7 @@ Backend REST API de la plateforme HealthAI Coach — gestion des utilisateurs, d
 | Validation | class-validator · class-transformer · Joi |
 | Documentation | Swagger / OpenAPI (`/doc`) |
 | Monitoring | NestJS Terminus (health check) |
+| Messaging | RabbitMQ (NestJS RMQ transport) |
 | Tests | Jest · Supertest |
 
 ## Endpoints
@@ -46,6 +47,8 @@ Authorization: Bearer <jwt_token>   ← routes protégées uniquement
 
 Les JWT doivent être émis par **Zitadel** (OIDC). L'API ne fournit plus d'endpoint de login local.
 
+Un rate limiting global est appliqué sur les endpoints API (hors `GET /health`), configurable avec `RATE_LIMIT_TTL_MS` et `RATE_LIMIT_MAX`.
+
 ## Installation
 
 ```bash
@@ -63,9 +66,23 @@ ZITADEL_JWKS_URI=https://your-instance.zitadel.cloud/oauth/v2/keys
 API_KEY=<min 32 chars>
 FRONTEND_ORIGIN=http://localhost:3000
 FRONTEND_CLIENT_ID=healthai-admin-front
+RATE_LIMIT_TTL_MS=60000
+RATE_LIMIT_MAX=100
 PORT=3001
 NODE_ENV=development
+RABBITMQ_ENABLED=false
+RABBITMQ_HOST=localhost
+RABBITMQ_PORT=5672
+RABBITMQ_USER=guest
+RABBITMQ_PASS=guest
+RABBITMQ_VHOST=/
+RABBITMQ_TLS=false
+RABBITMQ_QUEUE=healthai.load-balance
+RABBITMQ_PREFETCH_COUNT=10
 ```
+
+Quand `RABBITMQ_ENABLED=true`, l'API démarre aussi un transport RabbitMQ sur `RABBITMQ_QUEUE`.  
+En lançant plusieurs instances de l'API avec la même queue, RabbitMQ répartit automatiquement les messages entre les consommateurs (round-robin / load balancing).
 
 ## Scripts
 
