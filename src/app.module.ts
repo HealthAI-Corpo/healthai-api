@@ -8,8 +8,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
-import { ApiKeyGuard } from './auth/guards/api-key.guard';
-import { ClientIdGuard } from './auth/guards/client-id.guard';
 import { envValidationSchema } from './config/env.validation';
 import { buildTypeOrmOptions } from './database/typeorm.config';
 import { HealthController } from './health/health.controller';
@@ -74,14 +72,6 @@ import { EtlLogModule } from './modules/etl-log/etl-log.module';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: ApiKeyGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: ClientIdGuard,
     },
   ],
 })

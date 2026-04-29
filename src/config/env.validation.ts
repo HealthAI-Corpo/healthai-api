@@ -16,10 +16,8 @@ export const envValidationSchema = Joi.object({
   JWT_AUDIENCE: Joi.string().min(3).required(),
   JWT_EXPIRES_IN: Joi.string().default('3600s'),
 
-  // API gateway security
-  API_KEY: Joi.string().min(32).required(),
+  // CORS
   FRONTEND_ORIGIN: Joi.string().min(3).required(),
-  FRONTEND_CLIENT_ID: Joi.string().min(8).required(),
 
   // Rate limiting (milliseconds window + max requests per window)
   THROTTLE_TTL: Joi.number().integer().min(1000).default(60000),

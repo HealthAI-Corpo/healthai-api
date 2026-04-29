@@ -56,7 +56,7 @@ async function bootstrap() {
       callback(new Error('CORS policy: origin not allowed'));
     },
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'x-client-id'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   app.useGlobalPipes(
@@ -79,9 +79,8 @@ async function bootstrap() {
         '- Métriques de santé quotidiennes\n' +
         '- Datasets IA pour recommandations\n\n' +
         '**Sécurité:**\n' +
-        '- API Key globale (header `x-api-key`)\n' +
-        '- Client ID validation (header `x-client-id`)\n' +
-        '- JWT Bearer tokens',
+        '- Authentification via Zitadel (JWT Bearer RS256)\n' +
+        '- Rate limiting par IP',
     )
     .setVersion('1.0')
     .addBearerAuth(
@@ -92,24 +91,6 @@ async function bootstrap() {
         description: 'Entrez votre JWT token obtenu via POST /auth/login',
       },
       'JWT-auth',
-    )
-    .addApiKey(
-      {
-        type: 'apiKey',
-        name: 'x-api-key',
-        in: 'header',
-        description: 'Clé API globale (requise sur toutes les routes)',
-      },
-      'api-key',
-    )
-    .addApiKey(
-      {
-        type: 'apiKey',
-        name: 'x-client-id',
-        in: 'header',
-        description: 'Identifiant client frontend',
-      },
-      'client-id',
     )
     .addTag('auth', 'Authentification et gestion des sessions')
     .addTag('utilisateurs', 'Gestion des utilisateurs')
