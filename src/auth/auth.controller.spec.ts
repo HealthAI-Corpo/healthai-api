@@ -7,9 +7,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
 jest.mock('jwks-rsa', () =>
-  jest.fn(() => ({
-    getSigningKey: jest.fn(),
-  })),
+  jest.fn(() => ({ getSigningKey: jest.fn() })),
 );
 
 describe('AuthController', () => {
@@ -37,7 +35,7 @@ describe('AuthController', () => {
   describe('GET /auth/validate', () => {
     it('should return 200 and inject headers when token is valid', async () => {
       authServiceMock.validateToken.mockResolvedValue({
-        sub: 'zitadel-user-id',
+        sub: 'zitadel-uuid-123',
         email: 'user@example.com',
       });
 
@@ -47,7 +45,7 @@ describe('AuthController', () => {
         .expect(200);
 
       expect(res.body).toEqual({ valid: true });
-      expect(res.headers['x-user-id']).toBe('zitadel-user-id');
+      expect(res.headers['x-user-id']).toBe('zitadel-uuid-123');
       expect(res.headers['x-user-role']).toBe('user');
     });
 

@@ -1,73 +1,54 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
+import * as jsonwebtoken from 'jsonwebtoken';
 
-export interface JwtPayload {
-  sub: string;
-  email?: string;
-  [key: string]: unknown;
-}
+import { ZitadelJwtPayload } from './jwt.strategy';
 
 @Injectable()
 export class AuthService {
-  private readonly issuer: string;
-  private readonly audience: string;
-  private readonly jwks: ReturnType<typeof jwksClient>;
+  private readonly jwksClient: jwksClient.JwksClient;
 
   constructor(private readonly configService: ConfigService) {
-    this.issuer = this.configService
-      .getOrThrow<string>('ZITADEL_ISSUER')
-      .replace(/\/+$/, '');
-    this.audience = this.configService.getOrThrow<string>('ZITADEL_AUDIENCE');
-    const jwksUri =
-      this.configService.get<string>('ZITADEL_JWKS_URI') ??
-      `${this.issuer}/oauth/v2/keys`;
-    this.jwks = jwksClient({
-      jwksUri,
+    const domain = configService.getOrThrow<string>('ZITADEL_DOMAIN').replace(/\/$/, '');
+    this.jwksClient = jwksClient({
+      jwksUri: `${domain}/oauth/v2/keys`,
       cache: true,
-      cacheMaxEntries: 5,
       cacheMaxAge: 10 * 60 * 1000,
+      rateLimit: true,
+      jwksRequestsPerMinute: 5,
     });
   }
 
-  async validateToken(token: string): Promise<JwtPayload | null> {
+  // Used by GET /auth/validate (Traefik forward-auth proxy)
+  async validateToken(token: string): Promise<ZitadelJwtPayload | null> {
     try {
-      const decoded = jwt.decode(token, { complete: true });
-      if (
-        !decoded ||
-        typeof decoded !== 'object' ||
-        typeof decoded.header?.kid !== 'string'
-      ) {
+      const decoded = jsonwebtoken.decode(token, { complete: true });
+      if (!decoded || typeof decoded === 'string' || !decoded.header.kid) {
         return null;
       }
 
-      const key = await this.jwks.getSigningKey(decoded.header.kid);
-      const publicKey = key.getPublicKey();
+      const signingKey = await this.jwksClient.getSigningKey(decoded.header.kid);
+      const publicKey = signingKey.getPublicKey();
 
-      const payload = jwt.verify(token, publicKey, {
-        issuer: this.issuer,
-        audience: this.audience,
+      const payload = jsonwebtoken.verify(token, publicKey, {
         algorithms: ['RS256'],
-      });
+        issuer: this.configService.getOrThrow<string>('JWT_ISSUER'),
+        audience: this.configService.getOrThrow<string>('JWT_AUDIENCE'),
+      }) as ZitadelJwtPayload;
 
-      if (!payload || typeof payload !== 'object' || !('sub' in payload)) {
-        return null;
-      }
-
-      return payload as JwtPayload;
+      return payload;
     } catch {
       return null;
     }
   }
 
-  getPrimaryRole(payload: JwtPayload): string {
+  // Extract primary role from Zitadel's custom claim
+  getPrimaryRole(payload: ZitadelJwtPayload): string {
     const roles = payload['urn:zitadel:iam:org:project:roles'];
     if (roles && typeof roles === 'object') {
-      const roleNames = Object.keys(roles as Record<string, unknown>);
-      if (roleNames.length > 0) {
-        return roleNames[0];
-      }
+      const first = Object.keys(roles as Record<string, unknown>)[0];
+      if (first) return first;
     }
     return 'user';
   }

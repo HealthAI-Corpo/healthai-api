@@ -22,25 +22,23 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Validation de token Zitadel (Traefik forward-auth)',
+    summary: 'Token validation (Traefik forward-auth)',
     description:
-      'Endpoint interne appelé par Traefik avant chaque requête protégée. ' +
-      'Valide le JWT Zitadel du header Authorization et injecte X-User-Id + X-User-Role ' +
-      "dans la réponse pour transmission à l'upstream.",
+      'Internal endpoint called by Traefik before each protected request. ' +
+      'Validates the Zitadel JWT from the Authorization header and injects ' +
+      'X-User-Id + X-User-Role headers for the upstream service.',
   })
   @ApiResponse({
     status: 200,
-    description: 'Token valide — headers X-User-Id et X-User-Role injectés',
+    description: 'Token valid — X-User-Id and X-User-Role headers injected',
   })
-  @ApiResponse({ status: 401, description: 'Token manquant ou invalide' })
+  @ApiResponse({ status: 401, description: 'Missing or invalid token' })
   async validate(
     @Headers('authorization') authHeader: string,
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ valid: true }> {
     if (!authHeader?.startsWith('Bearer ')) {
-      throw new UnauthorizedException(
-        'Missing or malformed Authorization header',
-      );
+      throw new UnauthorizedException('Missing or malformed Authorization header');
     }
     const token = authHeader.substring(7);
     const payload = await this.authService.validateToken(token);

@@ -8,12 +8,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
-import { ApiKeyGuard } from './auth/guards/api-key.guard';
-import { ClientIdGuard } from './auth/guards/client-id.guard';
 import { envValidationSchema } from './config/env.validation';
 import { buildTypeOrmOptions } from './database/typeorm.config';
 import { HealthController } from './health/health.controller';
-import { RabbitMqModule } from './rabbitmq/rabbitmq.module';
 
 // Modules métier
 import { UtilisateurModule } from './modules/utilisateur/utilisateur.module';
@@ -38,13 +35,15 @@ import { EtlLogModule } from './modules/etl-log/etl-log.module';
     }),
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        throttlers: [
+          {
+            ttl: configService.get<number>('THROTTLE_TTL', 60000),
+            limit: configService.get<number>('THROTTLE_LIMIT', 100),
+          },
+        ],
+      }),
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => [
-        {
-          ttl: configService.get<number>('RATE_LIMIT_TTL_MS', 60_000),
-          limit: configService.get<number>('RATE_LIMIT_MAX', 100),
-        },
-      ],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -52,7 +51,6 @@ import { EtlLogModule } from './modules/etl-log/etl-log.module';
         buildTypeOrmOptions(configService),
       inject: [ConfigService],
     }),
-    RabbitMqModule,
     TerminusModule,
     AuthModule,
     // Modules métier
@@ -71,14 +69,6 @@ import { EtlLogModule } from './modules/etl-log/etl-log.module';
   controllers: [AppController, HealthController],
   providers: [
     AppService,
-    {
-      provide: APP_GUARD,
-      useClass: ApiKeyGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: ClientIdGuard,
-    },
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,

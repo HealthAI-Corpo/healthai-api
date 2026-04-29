@@ -8,42 +8,25 @@ export const envValidationSchema = Joi.object({
   DATABASE_URL: Joi.string()
     .uri({ scheme: ['postgres', 'postgresql'] })
     .required(),
-  ZITADEL_ISSUER: Joi.string()
-    .uri({ scheme: ['http', 'https'] })
-    .required(),
-  ZITADEL_AUDIENCE: Joi.string().min(3).required(),
-  ZITADEL_JWKS_URI: Joi.string()
-    .uri({ scheme: ['http', 'https'] })
-    .optional(),
-  API_KEY: Joi.string().min(32).required(),
+
+  // Zitadel identity provider
+  ZITADEL_DOMAIN: Joi.string().uri().required(),
+  // JWT claims — must match your Zitadel project's issuer and API audience
+  JWT_ISSUER: Joi.string().min(3).required(),
+  JWT_AUDIENCE: Joi.string().min(3).required(),
+  JWT_EXPIRES_IN: Joi.string().default('3600s'),
+
+  // CORS
   FRONTEND_ORIGIN: Joi.string().min(3).required(),
-  FRONTEND_CLIENT_ID: Joi.string().min(8).required(),
-  RATE_LIMIT_TTL_MS: Joi.number().integer().min(1).default(60000),
-  RATE_LIMIT_MAX: Joi.number().integer().min(1).default(100),
+
+  // Rate limiting (milliseconds window + max requests per window)
+  THROTTLE_TTL: Joi.number().integer().min(1000).default(60000),
+  THROTTLE_LIMIT: Joi.number().integer().min(1).default(100),
+
+  // Development only
   DEV_DEFAULT_USER_EMAIL: Joi.string()
     .email({ tlds: { allow: false } })
     .allow('')
     .optional(),
   DEV_DEFAULT_USER_PASSWORD: Joi.string().min(8).allow('').optional(),
-  RABBITMQ_ENABLED: Joi.boolean().default(false),
-  RABBITMQ_HOST: Joi.string().when('RABBITMQ_ENABLED', {
-    is: true,
-    then: Joi.required(),
-    otherwise: Joi.optional(),
-  }),
-  RABBITMQ_PORT: Joi.number().integer().min(1).max(65535).default(5672),
-  RABBITMQ_USER: Joi.string().when('RABBITMQ_ENABLED', {
-    is: true,
-    then: Joi.required(),
-    otherwise: Joi.optional(),
-  }),
-  RABBITMQ_PASS: Joi.string().when('RABBITMQ_ENABLED', {
-    is: true,
-    then: Joi.required(),
-    otherwise: Joi.optional(),
-  }),
-  RABBITMQ_VHOST: Joi.string().default('/'),
-  RABBITMQ_TLS: Joi.boolean().default(false),
-  RABBITMQ_QUEUE: Joi.string().default('healthai.load-balance'),
-  RABBITMQ_PREFETCH_COUNT: Joi.number().integer().min(1).default(10),
-}).unknown(true); // Allow unknown env variables
+}).unknown(true);
