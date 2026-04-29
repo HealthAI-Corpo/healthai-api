@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TerminusModule } from '@nestjs/terminus';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
-import { ApiKeyGuard } from './auth/guards/api-key.guard';
-import { ClientIdGuard } from './auth/guards/client-id.guard';
 import { envValidationSchema } from './config/env.validation';
 import { buildTypeOrmOptions } from './database/typeorm.config';
 import { HealthController } from './health/health.controller';
@@ -33,6 +32,18 @@ import { EtlLogModule } from './modules/etl-log/etl-log.module';
       isGlobal: true,
       envFilePath: ['.env.local', '.env'],
       validationSchema: envValidationSchema,
+    }),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        throttlers: [
+          {
+            ttl: configService.get<number>('THROTTLE_TTL', 60000),
+            limit: configService.get<number>('THROTTLE_LIMIT', 100),
+          },
+        ],
+      }),
+      inject: [ConfigService],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -60,11 +71,7 @@ import { EtlLogModule } from './modules/etl-log/etl-log.module';
     AppService,
     {
       provide: APP_GUARD,
-      useClass: ApiKeyGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: ClientIdGuard,
+      useClass: ThrottlerGuard,
     },
   ],
 })
