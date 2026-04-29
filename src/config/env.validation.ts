@@ -15,6 +15,9 @@ export const envValidationSchema = Joi.object({
   API_KEY: Joi.string().min(32).required(),
   FRONTEND_ORIGIN: Joi.string().min(3).required(),
   FRONTEND_CLIENT_ID: Joi.string().min(8).required(),
+  // Rate limiting (milliseconds window + max requests per window)
+  THROTTLE_TTL: Joi.number().integer().min(1000).default(60000),
+  THROTTLE_LIMIT: Joi.number().integer().min(1).default(100),
   DEV_DEFAULT_USER_EMAIL: Joi.string()
     .email({ tlds: { allow: false } })
     .allow('')

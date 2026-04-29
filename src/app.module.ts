@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TerminusModule } from '@nestjs/terminus';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -40,6 +41,18 @@ import { EtlLogModule } from './modules/etl-log/etl-log.module';
         buildTypeOrmOptions(configService),
       inject: [ConfigService],
     }),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        throttlers: [
+          {
+            ttl: configService.get<number>('THROTTLE_TTL', 60000),
+            limit: configService.get<number>('THROTTLE_LIMIT', 100),
+          },
+        ],
+      }),
+      inject: [ConfigService],
+    }),
     TerminusModule,
     AuthModule,
     // Modules métier
@@ -58,6 +71,10 @@ import { EtlLogModule } from './modules/etl-log/etl-log.module';
   controllers: [AppController, HealthController],
   providers: [
     AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
     {
       provide: APP_GUARD,
       useClass: ApiKeyGuard,
