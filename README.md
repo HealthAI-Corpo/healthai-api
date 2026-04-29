@@ -16,7 +16,7 @@ Built with NestJS 11, TypeScript, TypeORM, and PostgreSQL. Authentication is ful
 | Identity | Zitadel (OIDC — RS256 JWKS validation) |
 | Validation | class-validator · class-transformer · Joi |
 | Security | Helmet · @nestjs/throttler |
-| Docs | Swagger / OpenAPI at `/doc` |
+| Docs | Swagger / OpenAPI at `/api` |
 | Monitoring | NestJS Terminus (`/health`) |
 | Tests | Jest · Supertest |
 
@@ -81,7 +81,7 @@ Requires `DEV_DEFAULT_USER_EMAIL` and `DEV_DEFAULT_USER_PASSWORD` to be set. Ref
 ```bash
 npm run start:dev        # watch mode
 # → http://localhost:3001
-# → http://localhost:3001/doc  (Swagger UI)
+# → http://localhost:3001/api  (Swagger UI)
 ```
 
 ---
@@ -108,7 +108,7 @@ See `.env.example` for a ready-to-copy template with the real Zitadel URLs.
 
 ## API endpoints
 
-Full interactive documentation with request/response schemas is available at `/doc` (Swagger UI) once the server is running.
+Full interactive documentation with request/response schemas is available at `/api` (Swagger UI) once the server is running.
 
 | Group | Base path | Notes |
 |---|---|---|
