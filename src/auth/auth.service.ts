@@ -14,7 +14,7 @@ export class AuthService {
     this.jwksClient = jwksClient({
       jwksUri: `${domain}/oauth/v2/keys`,
       cache: true,
-      cacheMaxAge: 10 * 60 * 1000, // 10 minutes
+      cacheMaxAge: 10 * 60 * 1000,
       rateLimit: true,
       jwksRequestsPerMinute: 5,
     });
@@ -41,5 +41,15 @@ export class AuthService {
     } catch {
       return null;
     }
+  }
+
+  // Extract primary role from Zitadel's custom claim
+  getPrimaryRole(payload: ZitadelJwtPayload): string {
+    const roles = payload['urn:zitadel:iam:org:project:roles'];
+    if (roles && typeof roles === 'object') {
+      const first = Object.keys(roles as Record<string, unknown>)[0];
+      if (first) return first;
+    }
+    return 'user';
   }
 }

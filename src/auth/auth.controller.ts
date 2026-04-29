@@ -4,8 +4,8 @@ import {
   Headers,
   HttpCode,
   HttpStatus,
-  UnauthorizedException,
   Res,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
@@ -46,7 +46,7 @@ export class AuthController {
       throw new UnauthorizedException('Invalid or expired token');
     }
     res.setHeader('X-User-Id', payload.sub);
-    res.setHeader('X-User-Role', 'user');
+    res.setHeader('X-User-Role', this.authService.getPrimaryRole(payload));
     return { valid: true };
   }
 }

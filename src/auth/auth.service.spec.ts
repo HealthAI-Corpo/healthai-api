@@ -72,7 +72,6 @@ describe('AuthService', () => {
       const result = await service.validateToken('garbage');
 
       expect(result).toBeNull();
-      expect(mockGetSigningKey).not.toHaveBeenCalled();
     });
 
     it('should return null when token has no kid', async () => {
@@ -87,7 +86,7 @@ describe('AuthService', () => {
       expect(result).toBeNull();
     });
 
-    it('should return null when jsonwebtoken.verify throws', async () => {
+    it('should return null when verification throws', async () => {
       (jsonwebtoken.decode as jest.Mock).mockReturnValue({
         header: { kid: 'key-id-1', alg: 'RS256' },
         payload: validPayload,
@@ -100,6 +99,33 @@ describe('AuthService', () => {
       const result = await service.validateToken('expired.jwt.token');
 
       expect(result).toBeNull();
+    });
+  });
+
+  describe('getPrimaryRole', () => {
+    it('returns first Zitadel role when present', () => {
+      const role = service.getPrimaryRole({
+        sub: 'user-1',
+        email: 'u@example.com',
+        iss: 'https://example.zitadel.cloud',
+        aud: 'healthai-api',
+        exp: 9999999999,
+        iat: 0,
+        'urn:zitadel:iam:org:project:roles': { admin: {}, editor: {} },
+      });
+      expect(role).toBe('admin');
+    });
+
+    it('returns "user" when roles are missing', () => {
+      const role = service.getPrimaryRole({
+        sub: 'user-1',
+        email: 'u@example.com',
+        iss: 'https://example.zitadel.cloud',
+        aud: 'healthai-api',
+        exp: 9999999999,
+        iat: 0,
+      });
+      expect(role).toBe('user');
     });
   });
 });

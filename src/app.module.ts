@@ -33,12 +33,6 @@ import { EtlLogModule } from './modules/etl-log/etl-log.module';
       envFilePath: ['.env.local', '.env'],
       validationSchema: envValidationSchema,
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) =>
-        buildTypeOrmOptions(configService),
-      inject: [ConfigService],
-    }),
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -49,6 +43,12 @@ import { EtlLogModule } from './modules/etl-log/etl-log.module';
           },
         ],
       }),
+      inject: [ConfigService],
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) =>
+        buildTypeOrmOptions(configService),
       inject: [ConfigService],
     }),
     TerminusModule,

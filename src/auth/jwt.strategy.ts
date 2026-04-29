@@ -15,6 +15,7 @@ export interface ZitadelJwtPayload {
   aud: string | string[];
   exp: number;
   iat: number;
+  'urn:zitadel:iam:org:project:roles'?: Record<string, unknown>;
 }
 
 @Injectable()
