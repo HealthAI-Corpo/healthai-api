@@ -5,6 +5,7 @@ import { buildRabbitMqOptions, getRabbitMqSettings } from './rabbitmq.config';
 
 describe('rabbitmq.config', () => {
   it('returns disabled settings when RABBITMQ_ENABLED is false', () => {
+    const getOrThrow = jest.fn();
     const configService = {
       get: jest.fn((key: string, defaultValue?: unknown) => {
         const values: Record<string, unknown> = {
@@ -14,7 +15,7 @@ describe('rabbitmq.config', () => {
         };
         return values[key] ?? defaultValue;
       }),
-      getOrThrow: jest.fn(),
+      getOrThrow,
     } as unknown as ConfigService;
 
     const settings = getRabbitMqSettings(configService);
@@ -25,7 +26,7 @@ describe('rabbitmq.config', () => {
       urls: [],
       prefetchCount: 10,
     });
-    expect(configService.getOrThrow).not.toHaveBeenCalled();
+    expect(getOrThrow).not.toHaveBeenCalled();
   });
 
   it('builds a valid AMQP URL with encoded credentials and queue settings', () => {

@@ -10,7 +10,9 @@ export class AuthService {
   private readonly jwksClient: jwksClient.JwksClient;
 
   constructor(private readonly configService: ConfigService) {
-    const domain = configService.getOrThrow<string>('ZITADEL_DOMAIN').replace(/\/$/, '');
+    const domain = configService
+      .getOrThrow<string>('ZITADEL_DOMAIN')
+      .replace(/\/$/, '');
     this.jwksClient = jwksClient({
       jwksUri: `${domain}/oauth/v2/keys`,
       cache: true,
@@ -28,7 +30,9 @@ export class AuthService {
         return null;
       }
 
-      const signingKey = await this.jwksClient.getSigningKey(decoded.header.kid);
+      const signingKey = await this.jwksClient.getSigningKey(
+        decoded.header.kid,
+      );
       const publicKey = signingKey.getPublicKey();
 
       const payload = jsonwebtoken.verify(token, publicKey, {
@@ -47,7 +51,7 @@ export class AuthService {
   getPrimaryRole(payload: ZitadelJwtPayload): string {
     const roles = payload['urn:zitadel:iam:org:project:roles'];
     if (roles && typeof roles === 'object') {
-      const first = Object.keys(roles as Record<string, unknown>)[0];
+      const first = Object.keys(roles)[0];
       if (first) return first;
     }
     return 'user';

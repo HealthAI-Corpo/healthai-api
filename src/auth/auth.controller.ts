@@ -38,7 +38,9 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ valid: true }> {
     if (!authHeader?.startsWith('Bearer ')) {
-      throw new UnauthorizedException('Missing or malformed Authorization header');
+      throw new UnauthorizedException(
+        'Missing or malformed Authorization header',
+      );
     }
     const token = authHeader.substring(7);
     const payload = await this.authService.validateToken(token);
