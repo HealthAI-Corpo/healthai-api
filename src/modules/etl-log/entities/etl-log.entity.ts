@@ -12,10 +12,20 @@ export class EtlLog {
   @PrimaryGeneratedColumn({ name: 'id_etl_log' })
   idEtlLog: number;
 
-  @Column({ type: 'varchar', length: 255, nullable: false, name: 'libelle_pipeline' })
+  @Column({
+    type: 'varchar',
+    length: 255,
+    nullable: false,
+    name: 'libelle_pipeline',
+  })
   libellePipeline: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: false, name: 'fichier_nom' })
+  @Column({
+    type: 'varchar',
+    length: 255,
+    nullable: false,
+    name: 'fichier_nom',
+  })
   fichierNom: string;
 
   @Column({

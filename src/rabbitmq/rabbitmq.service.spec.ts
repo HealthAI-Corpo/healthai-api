@@ -18,9 +18,11 @@ describe('RabbitMqService', () => {
   });
 
   it('uses ClientProxy emit/send when RabbitMQ is enabled', async () => {
+    const emitMock = jest.fn().mockReturnValue(of(undefined));
+    const sendMock = jest.fn().mockReturnValue(of({ ok: true }));
     const client = {
-      emit: jest.fn().mockReturnValue(of(undefined)),
-      send: jest.fn().mockReturnValue(of({ ok: true })),
+      emit: emitMock,
+      send: sendMock,
     } as unknown as ClientProxy;
 
     const service = new RabbitMqService(client);
@@ -31,8 +33,8 @@ describe('RabbitMqService', () => {
       { id: 1 },
     );
 
-    expect(client.emit).toHaveBeenCalledWith('work.created', { id: 1 });
-    expect(client.send).toHaveBeenCalledWith('work.process', { id: 1 });
+    expect(emitMock).toHaveBeenCalledWith('work.created', { id: 1 });
+    expect(sendMock).toHaveBeenCalledWith('work.process', { id: 1 });
     expect(response).toEqual({ ok: true });
   });
 });

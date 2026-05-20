@@ -6,9 +6,7 @@ import { App } from 'supertest/types';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
-jest.mock('jwks-rsa', () =>
-  jest.fn(() => ({ getSigningKey: jest.fn() })),
-);
+jest.mock('jwks-rsa', () => jest.fn(() => ({ getSigningKey: jest.fn() })));
 
 describe('AuthController', () => {
   let app: INestApplication<App>;

@@ -52,7 +52,10 @@ describe('JwtStrategy', () => {
       providers: [
         JwtStrategy,
         { provide: ConfigService, useValue: mockConfigService },
-        { provide: getRepositoryToken(Utilisateur), useValue: mockUtilisateurRepo },
+        {
+          provide: getRepositoryToken(Utilisateur),
+          useValue: mockUtilisateurRepo,
+        },
       ],
     }).compile();
 

@@ -25,7 +25,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     @InjectRepository(Utilisateur)
     private readonly utilisateurRepository: Repository<Utilisateur>,
   ) {
-    const domain = configService.getOrThrow<string>('ZITADEL_DOMAIN').replace(/\/$/, '');
+    const domain = configService
+      .getOrThrow<string>('ZITADEL_DOMAIN')
+      .replace(/\/$/, '');
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -50,7 +52,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       where: { email: payload.email },
     });
     if (!utilisateur) {
-      throw new UnauthorizedException('User not provisioned in this application');
+      throw new UnauthorizedException(
+        'User not provisioned in this application',
+      );
     }
     return {
       idUtilisateur: utilisateur.idUtilisateur,
