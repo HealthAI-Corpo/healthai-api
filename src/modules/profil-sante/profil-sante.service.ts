@@ -44,6 +44,18 @@ export class ProfilSanteService {
     return this.profilSanteRepository.save(profilSante);
   }
 
+  async findByUserId(idUtilisateur: number): Promise<ProfilSante> {
+    const profilSante = await this.profilSanteRepository.findOne({
+      where: { idUtilisateur },
+    });
+    if (!profilSante) {
+      throw new NotFoundException(
+        `Profil santé de l'utilisateur ${idUtilisateur} introuvable`,
+      );
+    }
+    return profilSante;
+  }
+
   async remove(id: number): Promise<void> {
     const profilSante = await this.findOne(id);
     await this.profilSanteRepository.remove(profilSante);
