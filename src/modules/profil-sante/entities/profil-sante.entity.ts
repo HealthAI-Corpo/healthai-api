@@ -77,29 +77,6 @@ export class ProfilSante {
   @Column({ type: 'int', nullable: true, name: 'frequence_entrainement' })
   frequenceEntrainement: number;
 
-  // Champs sportifs US-2
-  @Column({ type: 'int', nullable: true })
-  age: number | null;
-
-  @Column({ type: 'varchar', length: 50, nullable: true, name: 'niveau_sportif' })
-  niveauSportif: string | null;
-
-  @Column({ type: 'text', nullable: true, name: 'equipement_disponible' })
-  equipementDisponible: string | null;
-
-  // Données cardiaques (optionnelles — dégradation gracieuse ML)
-  @Column({ type: 'int', nullable: true, name: 'hr_rest' })
-  hrRest: number | null;
-
-  @Column({ type: 'int', nullable: true, name: 'hr_max' })
-  hrMax: number | null;
-
-  @Column({ type: 'int', nullable: true, name: 'hr_avg' })
-  hrAvg: number | null;
-
-  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true, name: 'body_fat_pct' })
-  bodyFatPct: number | null;
-
   @OneToOne(() => Utilisateur, (utilisateur) => utilisateur.profilSante, {
     nullable: false,
     onDelete: 'CASCADE',
