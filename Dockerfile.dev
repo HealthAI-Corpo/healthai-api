@@ -8,8 +8,8 @@ COPY package*.json ./
 # Install all dependencies (including dev dependencies)
 RUN npm install
 
-# Expose the port
-EXPOSE 5000
+# Expose the port (matches the app's default PORT=3001)
+EXPOSE 3001
 
 # Start in development mode
 CMD ["npm", "run", "start:dev"]
