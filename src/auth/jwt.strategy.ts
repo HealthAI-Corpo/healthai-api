@@ -1,12 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { InjectRepository } from '@nestjs/typeorm';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { passportJwtSecret } from 'jwks-rsa';
-import { Repository } from 'typeorm';
-
-import { Utilisateur } from '../modules/utilisateur/entities/utilisateur.entity';
 
 export interface ZitadelJwtPayload {
   sub: string;
@@ -20,11 +16,7 @@ export interface ZitadelJwtPayload {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(
-    configService: ConfigService,
-    @InjectRepository(Utilisateur)
-    private readonly utilisateurRepository: Repository<Utilisateur>,
-  ) {
+  constructor(configService: ConfigService) {
     const domain = configService
       .getOrThrow<string>('ZITADEL_DOMAIN')
       .replace(/\/$/, '');
@@ -44,21 +36,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(
-    payload: ZitadelJwtPayload,
-  ): Promise<Pick<Utilisateur, 'idUtilisateur' | 'email'>> {
-    // Match Zitadel user to local Utilisateur record by email
-    const utilisateur = await this.utilisateurRepository.findOne({
-      where: { email: payload.email },
-    });
-    if (!utilisateur) {
-      throw new UnauthorizedException(
-        'User not provisioned in this application',
-      );
-    }
-    return {
-      idUtilisateur: utilisateur.idUtilisateur,
-      email: utilisateur.email,
-    };
+  validate(payload: ZitadelJwtPayload): ZitadelJwtPayload {
+    // JWT signature already verified by Passport — return Zitadel payload as-is.
+    // req.user will contain: { sub, email, iss, aud, exp, iat, roles }
+    return payload;
   }
 }
