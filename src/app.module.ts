@@ -26,6 +26,7 @@ import { ProfilSanteModule } from './modules/profil-sante/profil-sante.module';
 import { RecommandationsRegimeModule } from './modules/datasets/recommandations-regime/recommandations-regime.module';
 import { HistoriqueSeanceExerciceModule } from './modules/datasets/historique-seance-exercice/historique-seance-exercice.module';
 import { EtlLogModule } from './modules/etl-log/etl-log.module';
+import { RabbitMqModule } from './rabbitmq/rabbitmq.module';
 
 @Module({
   imports: [
@@ -66,6 +67,8 @@ import { EtlLogModule } from './modules/etl-log/etl-log.module';
     RecommandationsRegimeModule,
     HistoriqueSeanceExerciceModule,
     EtlLogModule,
+    // Bus de messages
+    RabbitMqModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
