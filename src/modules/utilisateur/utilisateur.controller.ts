@@ -9,6 +9,8 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  Headers,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -18,6 +20,7 @@ import {
   ApiParam,
   ApiBody,
 } from '@nestjs/swagger';
+import { AuthService } from '../../auth/auth.service';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import type { ZitadelJwtPayload } from '../../auth/jwt.strategy';
 import { UtilisateurService } from './utilisateur.service';
@@ -28,7 +31,10 @@ import { UpdateUtilisateurDto } from './dto/update-utilisateur.dto';
 @ApiBearerAuth('JWT-auth')
 @Controller('utilisateurs')
 export class UtilisateurController {
-  constructor(private readonly utilisateurService: UtilisateurService) {}
+  constructor(
+    private readonly utilisateurService: UtilisateurService,
+    private readonly authService: AuthService,
+  ) {}
 
   @Post()
   @ApiOperation({
@@ -65,8 +71,23 @@ export class UtilisateurController {
     status: 401,
     description: 'Token Zitadel manquant ou invalide',
   })
-  sync(@CurrentUser() user: ZitadelJwtPayload) {
-    return this.utilisateurService.syncFromZitadel(user.sub, user.email);
+  async sync(
+    @CurrentUser() user: ZitadelJwtPayload,
+    @Headers('authorization') authorization?: string,
+  ) {
+    // L'access token JWT Zitadel ne contient pas l'email : on le
+    // récupère via le userinfo endpoint avec ce même token.
+    let email = user.email;
+    if (!email && authorization) {
+      const token = authorization.replace(/^Bearer\s+/i, '');
+      email = (await this.authService.fetchUserinfoEmail(token)) ?? undefined;
+    }
+    if (!email) {
+      throw new UnprocessableEntityException(
+        'Email introuvable : ni dans le token, ni via le userinfo Zitadel',
+      );
+    }
+    return this.utilisateurService.syncFromZitadel(user.sub, email);
   }
 
   @Get()
