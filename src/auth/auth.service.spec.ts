@@ -128,4 +128,41 @@ describe('AuthService', () => {
       expect(role).toBe('user');
     });
   });
+
+  describe('fetchUserinfoEmail', () => {
+    const fetchMock = jest.fn();
+
+    beforeEach(() => {
+      global.fetch = fetchMock as unknown as typeof fetch;
+    });
+
+    afterEach(() => jest.clearAllMocks());
+
+    it('returns the email from the Zitadel userinfo endpoint', async () => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ email: 'wessim@example.com' }),
+      });
+
+      const email = await service.fetchUserinfoEmail('access-token');
+
+      expect(email).toBe('wessim@example.com');
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining('/oidc/v1/userinfo'),
+        { headers: { Authorization: 'Bearer access-token' } },
+      );
+    });
+
+    it('returns null when userinfo responds with an error', async () => {
+      fetchMock.mockResolvedValue({ ok: false, status: 401 });
+
+      expect(await service.fetchUserinfoEmail('bad-token')).toBeNull();
+    });
+
+    it('returns null when userinfo is unreachable', async () => {
+      fetchMock.mockRejectedValue(new Error('ECONNREFUSED'));
+
+      expect(await service.fetchUserinfoEmail('token')).toBeNull();
+    });
+  });
 });
