@@ -14,7 +14,8 @@ export class MetricsMiddleware implements NestMiddleware {
       // req.route n'est dispo qu'une fois le routing Express effectué (au moment
       // de "finish"), ce qui permet d'avoir le pattern de route ("/users/:id")
       // plutôt que l'URL brute et d'éviter l'explosion de cardinalité des labels.
-      const route = (req.route?.path as string | undefined) ?? req.path;
+      const route =
+        (req.route as { path?: string } | undefined)?.path ?? req.path;
       const labels = {
         method: req.method,
         route,
