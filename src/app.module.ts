@@ -12,6 +12,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { envValidationSchema } from './config/env.validation';
 import { buildTypeOrmOptions } from './database/typeorm.config';
 import { HealthController } from './health/health.controller';
+import { MetricsModule } from './metrics/metrics.module';
 
 // Modules métier
 import { UtilisateurModule } from './modules/utilisateur/utilisateur.module';
@@ -53,6 +54,7 @@ import { EtlLogModule } from './modules/etl-log/etl-log.module';
       inject: [ConfigService],
     }),
     TerminusModule,
+    MetricsModule,
     AuthModule,
     // Modules métier
     UtilisateurModule,
