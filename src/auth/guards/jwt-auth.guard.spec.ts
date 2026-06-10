@@ -55,10 +55,7 @@ describe('JwtAuthGuard', () => {
     mockReflector.getAllAndOverride.mockReturnValue(false);
 
     const superCanActivate = jest
-      .spyOn(
-        Object.getPrototypeOf(Object.getPrototypeOf(guard)),
-        'canActivate',
-      )
+      .spyOn(Object.getPrototypeOf(Object.getPrototypeOf(guard)), 'canActivate')
       .mockReturnValue(true);
 
     const result = guard.canActivate(buildContext());
@@ -71,13 +68,10 @@ describe('JwtAuthGuard', () => {
     mockReflector.getAllAndOverride.mockReturnValue(undefined);
 
     const superCanActivate = jest
-      .spyOn(
-        Object.getPrototypeOf(Object.getPrototypeOf(guard)),
-        'canActivate',
-      )
+      .spyOn(Object.getPrototypeOf(Object.getPrototypeOf(guard)), 'canActivate')
       .mockReturnValue(true);
 
-    guard.canActivate(buildContext());
+    void guard.canActivate(buildContext());
 
     expect(superCanActivate).toHaveBeenCalled();
   });
