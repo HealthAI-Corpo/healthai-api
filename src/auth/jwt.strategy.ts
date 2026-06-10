@@ -6,7 +6,8 @@ import { passportJwtSecret } from 'jwks-rsa';
 
 export interface ZitadelJwtPayload {
   sub: string;
-  email: string;
+  // Absent des access tokens JWT Zitadel — récupéré via userinfo si besoin
+  email?: string;
   iss: string;
   aud: string | string[];
   exp: number;

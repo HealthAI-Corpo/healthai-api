@@ -8,18 +8,34 @@ import { ZitadelJwtPayload } from './jwt.strategy';
 @Injectable()
 export class AuthService {
   private readonly jwksClient: jwksClient.JwksClient;
+  private readonly zitadelDomain: string;
 
   constructor(private readonly configService: ConfigService) {
-    const domain = configService
+    this.zitadelDomain = configService
       .getOrThrow<string>('ZITADEL_DOMAIN')
       .replace(/\/$/, '');
     this.jwksClient = jwksClient({
-      jwksUri: `${domain}/oauth/v2/keys`,
+      jwksUri: `${this.zitadelDomain}/oauth/v2/keys`,
       cache: true,
       cacheMaxAge: 10 * 60 * 1000,
       rateLimit: true,
       jwksRequestsPerMinute: 5,
     });
+  }
+
+  // L'access token JWT Zitadel ne porte que `sub` — l'email vit dans
+  // le userinfo endpoint, interrogé avec ce même token.
+  async fetchUserinfoEmail(accessToken: string): Promise<string | null> {
+    try {
+      const res = await fetch(`${this.zitadelDomain}/oidc/v1/userinfo`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!res.ok) return null;
+      const body = (await res.json()) as { email?: string };
+      return body.email ?? null;
+    } catch {
+      return null;
+    }
   }
 
   // Used by GET /auth/validate (Traefik forward-auth proxy)

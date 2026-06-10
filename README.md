@@ -1,157 +1,202 @@
+<div align="center">
+
 # HealthAI API
 
-REST API for the HealthAI Coach platform — user management, health data, and AI datasets.
+**REST API de la plateforme HealthAI Coach** — gestion des utilisateurs, données de santé et datasets IA.
 
-Built with NestJS 11, TypeScript, TypeORM, and PostgreSQL. Authentication is fully delegated to **Zitadel** (OIDC / RS256 JWT).
+[![CI](https://github.com/HealthAI-Corpo/healthai-api/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/HealthAI-Corpo/healthai-api/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/HealthAI-Corpo/healthai-api?logo=github)](https://github.com/HealthAI-Corpo/healthai-api/releases)
+[![NestJS](https://img.shields.io/badge/NestJS-11-E0234E?logo=nestjs&logoColor=white)](https://nestjs.com)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-FE5196?logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org)
+
+[Architecture](#architecture) · [Démarrage rapide](#démarrage-rapide) · [Authentification](#authentification) · [API](#endpoints) · [CI/CD](#cicd)
+
+</div>
 
 ---
 
-## Stack
+## Sommaire
 
-| Layer | Technology |
+- [Architecture](#architecture)
+- [Stack technique](#stack-technique)
+- [Authentification](#authentification)
+- [Démarrage rapide](#démarrage-rapide)
+- [Variables d'environnement](#variables-denvironnement)
+- [Endpoints](#endpoints)
+- [Scripts](#scripts)
+- [Docker](#docker)
+- [CI/CD](#cicd)
+- [Structure du projet](#structure-du-projet)
+- [Configuration Zitadel](#configuration-zitadel)
+
+---
+
+## Architecture
+
+```mermaid
+flowchart LR
+    subgraph CLIENTS["Clients"]
+        WEB["healthai-web\nNext.js"]
+        ETL["healthai-etl\nFastAPI"]
+    end
+
+    subgraph IDP["Identité"]
+        ZIT["Zitadel\nOIDC Provider"]
+    end
+
+    subgraph API["healthai-api (ce repo)"]
+        GUARD["JwtAuthGuard\nvalidation RS256 / JWKS"]
+        MODULES["Modules métier\nutilisateurs · logs · profils · datasets"]
+    end
+
+    DB[("PostgreSQL 15")]
+
+    WEB -- "login OIDC" --> ZIT
+    ZIT -- "JWT (sub, email, rôles)" --> WEB
+    WEB -- "Bearer JWT" --> GUARD
+    ETL -- "Bearer JWT" --> GUARD
+    GUARD --> MODULES
+    MODULES --> DB
+    GUARD -. "JWKS (clés publiques,\ncache 10 min)" .-> ZIT
+```
+
+L'API ne stocke **aucun mot de passe** et n'émet **aucun token** : l'identité est entièrement déléguée à Zitadel. Chaque requête porte un Bearer JWT validé localement (signature RS256, issuer, audience) via le JWKS public de Zitadel.
+
+---
+
+## Stack technique
+
+| Couche | Technologie |
 |---|---|
 | Framework | NestJS 11 (Express) |
-| Language | TypeScript 5.7 |
-| Database | PostgreSQL 15 via TypeORM 0.3 |
-| Identity | Zitadel (OIDC — RS256 JWKS validation) |
+| Langage | TypeScript 5.7 |
+| Base de données | PostgreSQL 15 · TypeORM 0.3 (migrations) |
+| Identité | Zitadel — OIDC, validation JWKS RS256 |
 | Validation | class-validator · class-transformer · Joi |
-| Security | Helmet · @nestjs/throttler |
-| Docs | Swagger / OpenAPI at `/api` |
-| Monitoring | NestJS Terminus (`/health`) |
+| Sécurité | Helmet · @nestjs/throttler (rate limiting) |
+| Messaging | RabbitMQ (@nestjs/microservices) |
+| Documentation | Swagger / OpenAPI — `/api` |
+| Monitoring | NestJS Terminus — `/health` |
 | Tests | Jest · Supertest |
+| Release | git-cliff · semver automatique · ghcr.io |
 
 ---
 
-## Security model
+## Authentification
+
+### Validation des requêtes
 
 ```
-Request
+Requête entrante
   ↓
-Rate limiter      — 100 req / 60 s per IP (configurable)
+Rate limiter        100 req / 60 s par IP (configurable)
   ↓
-Zitadel JWT       — RS256, issuer + audience validated against JWKS
+JwtAuthGuard        global — toutes les routes sauf @Public()
+  │                 signature RS256 · issuer · audience · expiration
   ↓
-Endpoint
+Endpoint            payload Zitadel accessible via @CurrentUser()
 ```
 
-The API never issues tokens. Users authenticate through Zitadel and send the resulting Bearer token on every request. The API validates the token locally using Zitadel's public JWKS endpoint — no network call per request after the first fetch (keys are cached 10 min).
+### Provisioning JIT (Just-In-Time)
 
-CORS restricts browser-based calls to the origins listed in `FRONTEND_ORIGIN`.
+Zitadel est la **source de vérité** de l'identité. La base métier se remplit automatiquement au premier login — aucune création manuelle de compte :
+
+```mermaid
+sequenceDiagram
+    participant U as Utilisateur
+    participant Z as Zitadel
+    participant W as healthai-web
+    participant A as healthai-api
+    participant DB as PostgreSQL
+
+    U->>Z: Login (email + mot de passe)
+    Z-->>W: JWT (sub, email, rôles)
+    W->>A: POST /utilisateurs/sync (Bearer JWT)
+    A->>A: Validation JWT (JWKS)
+    A->>DB: upsert par zitadel_id
+    Note over A,DB: 1. zitadel_id connu → no-op<br/>2. email connu → rattachement legacy<br/>3. inconnu → création
+    A-->>W: Utilisateur
+```
+
+L'endpoint `sync` lit `sub` et `email` **depuis le token validé** — jamais depuis le body. Il est idempotent : rappelé à chaque login sans effet de bord.
 
 ---
 
-## Getting started
+## Démarrage rapide
 
-### Prerequisites
+### Prérequis
 
 - Node.js 20+
-- A running PostgreSQL instance
-- A Zitadel project with an API application configured
+- PostgreSQL 15 en cours d'exécution
+- Une instance Zitadel configurée ([voir plus bas](#configuration-zitadel))
 
-### 1. Install dependencies
+### Installation
 
 ```bash
+# 1. Dépendances
 npm install
-```
 
-### 2. Configure environment
+# 2. Configuration
+cp .env.example .env        # puis éditer les valeurs
 
-```bash
-cp .env.example .env
-```
-
-Edit `.env` — see [Environment variables](#environment-variables) below.
-
-### 3. Run database migrations
-
-```bash
+# 3. Migrations
 npm run migration:run
+
+# 4. Lancement (watch mode)
+npm run start:dev
 ```
 
-### 4. (Optional) seed a dev user
-
-```bash
-npm run seed:dev-account
-```
-
-Requires `DEV_DEFAULT_USER_EMAIL` and `DEV_DEFAULT_USER_PASSWORD` to be set. Refuses to run in production.
-
-### 5. Start
-
-```bash
-npm run start:dev        # watch mode
-# → http://localhost:3001
-# → http://localhost:3001/api  (Swagger UI)
-```
+L'API écoute sur `http://localhost:3001` — Swagger UI sur `http://localhost:3001/api`.
 
 ---
 
-## Environment variables
+## Variables d'environnement
 
-| Variable | Required | Description |
+| Variable | Requis | Description |
+|---|:---:|---|
+| `DATABASE_URL` | ✅ | Chaîne de connexion PostgreSQL |
+| `ZITADEL_DOMAIN` | ✅ | URL de l'instance Zitadel |
+| `JWT_ISSUER` | ✅ | Issuer attendu dans les tokens (= `ZITADEL_DOMAIN` en général) |
+| `JWT_AUDIENCE` | ✅ | **Project ID** du projet Zitadel contenant l'app front |
+| `FRONTEND_ORIGIN` | ✅ | Origines CORS autorisées (séparées par des virgules) |
+| `THROTTLE_TTL` | — | Fenêtre de rate limit en ms (défaut `60000`) |
+| `THROTTLE_LIMIT` | — | Requêtes max par fenêtre et par IP (défaut `100`) |
+| `PORT` | — | Port HTTP (défaut `3001`) |
+| `NODE_ENV` | — | `development` / `production` / `test` |
+
+Modèle complet prêt à copier : [`.env.example`](.env.example).
+
+---
+
+## Endpoints
+
+Documentation interactive complète (schémas requête/réponse) sur **`/api`** (Swagger UI).
+
+| Groupe | Route | Description |
 |---|---|---|
-| `DATABASE_URL` | Yes | PostgreSQL connection string |
-| `ZITADEL_DOMAIN` | Yes | Your Zitadel instance URL |
-| `JWT_ISSUER` | Yes | Must match the issuer claim in Zitadel tokens (usually same as `ZITADEL_DOMAIN`) |
-| `JWT_AUDIENCE` | Yes | Client ID of your NestJS API app in Zitadel |
-| `FRONTEND_ORIGIN` | Yes | Comma-separated list of allowed CORS origins |
-| `THROTTLE_TTL` | No | Rate limit window in ms (default: `60000`) |
-| `THROTTLE_LIMIT` | No | Max requests per window per IP (default: `100`) |
-| `PORT` | No | HTTP port (default: `3001`) |
-| `NODE_ENV` | No | `development` / `production` / `test` |
-| `DEV_DEFAULT_USER_EMAIL` | No | Dev seed account email |
-| `DEV_DEFAULT_USER_PASSWORD` | No | Dev seed account password (min 8 chars) |
+| Auth | `GET /auth/validate` | Forward-auth Traefik — valide le Bearer, injecte `X-User-Id` |
+| Santé | `GET /health` | Publique — ping base de données |
+| Utilisateurs | `POST /utilisateurs/sync` | **Provisioning JIT** depuis le token Zitadel (idempotent) |
+| Utilisateurs | `CRUD /utilisateurs` | Gestion des comptes |
+| Aliments | `CRUD /aliments` | Référentiel nutritionnel |
+| Exercices | `CRUD /exercices` | Référentiel sportif |
+| Logs aliments | `CRUD /log-aliment` | Journal nutritionnel |
+| Logs séances | `CRUD /log-seance` | Journal d'entraînement |
+| Logs santé | `CRUD /log-sante` | Mesures de santé |
+| Profils santé | `CRUD /profil-sante` | Un par utilisateur |
+| Datasets IA | `CRUD /datasets/recommandations-regime` | Données nettoyées pour l'IA |
+| Datasets IA | `CRUD /datasets/historique-seance-exercice` | Données nettoyées pour l'IA |
 
-See `.env.example` for a ready-to-copy template with the real Zitadel URLs.
-
----
-
-## API endpoints
-
-Full interactive documentation with request/response schemas is available at `/api` (Swagger UI) once the server is running.
-
-| Group | Base path | Notes |
-|---|---|---|
-| Auth | `GET /auth/validate` | Traefik forward-auth proxy — validates Bearer token, injects `X-User-Id` |
-| Health | `GET /health` | Public — database ping |
-| Users | `CRUD /utilisateurs` | |
-| Foods | `CRUD /aliments` | |
-| Exercises | `CRUD /exercices` | |
-| Food logs | `CRUD /log-aliment` | |
-| Session logs | `CRUD /log-seance` | |
-| Health logs | `CRUD /log-sante` | |
-| Health profiles | `CRUD /profil-sante` | One per user |
-| AI dataset — diets | `CRUD /datasets/recommandations-regime` | Pre-cleaned data for AI |
-| AI dataset — sessions | `CRUD /datasets/historique-seance-exercice` | Pre-cleaned data for AI |
-
-All routes except `GET /health` require a valid Zitadel Bearer token.
-
----
-
-## Docker
-
-```bash
-# Build
-docker build -t healthai-api .
-
-# Run (pass all required env vars)
-docker run -p 3001:3001 \
-  -e DATABASE_URL="postgresql://..." \
-  -e ZITADEL_DOMAIN="http://mspr-zitadel-a7c405-158-220-101-254.traefik.me" \
-  -e JWT_ISSUER="http://mspr-zitadel-a7c405-158-220-101-254.traefik.me" \
-  -e JWT_AUDIENCE="370596489371582467" \
-  -e FRONTEND_ORIGIN="http://localhost:3000" \
-  healthai-api
-```
-
-The container must have outbound access to your Zitadel instance to fetch JWKS keys on startup.
+> Toutes les routes exigent un Bearer JWT Zitadel valide, sauf `GET /health`.
 
 ---
 
 ## Scripts
 
 ```bash
-# Development
+# Développement
 npm run start:dev          # watch mode
 npm run start:debug        # debug + watch
 
@@ -159,38 +204,77 @@ npm run start:debug        # debug + watch
 npm run build
 npm run start:prod
 
-# Database
-npm run migration:generate # generate migration from entity changes
-npm run migration:create   # create an empty migration file
-npm run migration:run      # apply pending migrations
-npm run migration:revert   # roll back last migration
-npm run seed:dev-account   # create dev user (development only)
+# Base de données
+npm run migration:generate # génère une migration depuis les entités
+npm run migration:run      # applique les migrations
+npm run migration:revert   # annule la dernière migration
 
-# Tests
-npm run test               # unit tests
-npm run test:cov           # unit tests + coverage report
-npm run test:e2e           # end-to-end tests
-
-# Code quality
+# Qualité
+npm run test               # tests unitaires
+npm run test:cov           # couverture
+npm run test:e2e           # tests end-to-end
 npm run lint               # ESLint (auto-fix)
 npm run format             # Prettier
 ```
 
 ---
 
-## Project structure
+## Docker
+
+Image multi-stage, exécutée en utilisateur **non-root** (`node`), publiée sur **ghcr.io** :
+
+```bash
+docker pull ghcr.io/healthai-corpo/healthai-api:latest
+```
+
+```bash
+docker run -p 3001:3001 \
+  -e DATABASE_URL="postgresql://user:pass@host:5432/healthai_db" \
+  -e ZITADEL_DOMAIN="https://votre-zitadel" \
+  -e JWT_ISSUER="https://votre-zitadel" \
+  -e JWT_AUDIENCE="<project-id-frontend>" \
+  -e FRONTEND_ORIGIN="https://votre-front" \
+  ghcr.io/healthai-corpo/healthai-api:latest
+```
+
+> Le conteneur doit pouvoir joindre Zitadel pour récupérer les clés JWKS au premier appel. Les migrations TypeORM s'exécutent au démarrage.
+
+---
+
+## CI/CD
+
+```
+PR → develop          lint + tests (status check « CI » requis)
+develop → main        PR obligatoire depuis develop (check-source-branch)
+merge sur main        version calculée par git-cliff (conventional commits)
+                      → build & push ghcr.io :vX.Y.Z + :latest
+                      → tag git + GitHub Release avec changelog
+```
+
+| Workflow | Rôle |
+|---|---|
+| `ci.yml` | ESLint · Jest (+ Postgres service) · build & release sur main |
+| `commitlint.yml` | Convention de commits (`feat:`, `fix:`, …) imposée sur les PRs |
+| `check-source-branch.yml` | Les PRs vers `main` doivent venir de `develop` |
+
+Le versioning est **entièrement automatique** : `fix:` → patch, `feat:` → minor, `BREAKING CHANGE` → major.
+
+---
+
+## Structure du projet
 
 ```
 src/
-├── auth/                  # Zitadel JWT strategy, guards, Traefik validate endpoint
-│   ├── guards/            # JwtAuthGuard
-│   └── decorators/        # @Public()
-├── config/                # Joi env validation schema
-├── common/                # CORS util, global exception filter
-├── database/              # TypeORM datasource, migrations
-├── health/                # Health check controller
+├── auth/                  # Stratégie JWT Zitadel, guards, décorateurs
+│   ├── guards/            #   JwtAuthGuard (global)
+│   └── decorators/        #   @Public() · @CurrentUser()
+├── common/                # CORS, filtre d'exceptions global
+├── config/                # Validation Joi des variables d'env
+├── database/              # Datasource TypeORM, migrations
+├── health/                # Health check (Terminus)
+├── rabbitmq/              # Connexion broker (@nestjs/microservices)
 └── modules/
-    ├── utilisateur/
+    ├── utilisateur/       # + provisioning JIT (/utilisateurs/sync)
     ├── aliment/
     ├── exercice/
     ├── log-aliment/
@@ -205,12 +289,23 @@ src/
 
 ---
 
-## Zitadel setup
+## Configuration Zitadel
 
-1. Create an **API application** inside your Zitadel project
-2. Set `JWT_AUDIENCE` to the application's **Client ID**
-3. Set `JWT_ISSUER` and `ZITADEL_DOMAIN` to your instance URL (check the **URLs** tab in the app settings)
-4. Create a **Web / SPA application** (PKCE) for your frontend in the same project — tokens it requests will carry the API audience automatically
-5. For machine-to-machine callers, create a **Service User** in Zitadel
+Un **seul projet** Zitadel (« Frontend ») porte l'app web, les rôles et l'audience :
 
-The API validates tokens at `{ZITADEL_DOMAIN}/oauth/v2/keys` (JWKS).
+1. **Projet → General** : cocher *Return user roles during authentication*
+2. **Projet → Roles** : créer `admin` et `user`
+3. **Projet → Role Assignments** : assigner les rôles aux utilisateurs
+4. **App web → Token Settings** :
+   - *Auth Token Type* = **JWT** (l'API valide en local via JWKS — un token opaque serait rejeté)
+   - cocher *Add user roles to the access token*
+   - cocher *User roles inside ID Token*
+5. **Côté API** : `JWT_AUDIENCE` = **Project ID** du projet (tous les tokens émis pour les apps du projet le portent en audience)
+
+L'API valide les tokens sur `{ZITADEL_DOMAIN}/oauth/v2/keys` (JWKS, cache 10 min). Aucune app Zitadel dédiée à l'API n'est nécessaire.
+
+---
+
+<div align="center">
+<sub>HealthAI Coach — projet MSPR · <a href="https://github.com/HealthAI-Corpo">HealthAI-Corpo</a></sub>
+</div>

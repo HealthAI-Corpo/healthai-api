@@ -9,6 +9,8 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  Headers,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -18,6 +20,9 @@ import {
   ApiParam,
   ApiBody,
 } from '@nestjs/swagger';
+import { AuthService } from '../../auth/auth.service';
+import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import type { ZitadelJwtPayload } from '../../auth/jwt.strategy';
 import { UtilisateurService } from './utilisateur.service';
 import { CreateUtilisateurDto } from './dto/create-utilisateur.dto';
 import { UpdateUtilisateurDto } from './dto/update-utilisateur.dto';
@@ -26,7 +31,10 @@ import { UpdateUtilisateurDto } from './dto/update-utilisateur.dto';
 @ApiBearerAuth('JWT-auth')
 @Controller('utilisateurs')
 export class UtilisateurController {
-  constructor(private readonly utilisateurService: UtilisateurService) {}
+  constructor(
+    private readonly utilisateurService: UtilisateurService,
+    private readonly authService: AuthService,
+  ) {}
 
   @Post()
   @ApiOperation({
@@ -44,6 +52,42 @@ export class UtilisateurController {
   })
   create(@Body() createUtilisateurDto: CreateUtilisateurDto) {
     return this.utilisateurService.create(createUtilisateurDto);
+  }
+
+  @Post('sync')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "Synchroniser l'utilisateur connecté depuis Zitadel",
+    description:
+      "Provisioning JIT : crée l'utilisateur en base au premier login " +
+      '(sub + email lus dans le token), le rattache par email si un compte ' +
+      'local existe déjà, sinon ne fait rien. Idempotent.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Utilisateur synchronisé (créé, rattaché ou déjà présent)',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Token Zitadel manquant ou invalide',
+  })
+  async sync(
+    @CurrentUser() user: ZitadelJwtPayload,
+    @Headers('authorization') authorization?: string,
+  ) {
+    // L'access token JWT Zitadel ne contient pas l'email : on le
+    // récupère via le userinfo endpoint avec ce même token.
+    let email = user.email;
+    if (!email && authorization) {
+      const token = authorization.replace(/^Bearer\s+/i, '');
+      email = (await this.authService.fetchUserinfoEmail(token)) ?? undefined;
+    }
+    if (!email) {
+      throw new UnprocessableEntityException(
+        'Email introuvable : ni dans le token, ni via le userinfo Zitadel',
+      );
+    }
+    return this.utilisateurService.syncFromZitadel(user.sub, email);
   }
 
   @Get()

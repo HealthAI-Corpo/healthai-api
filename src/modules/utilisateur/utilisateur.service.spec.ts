@@ -10,6 +10,7 @@ import { UtilisateurService } from './utilisateur.service';
 
 const mockUtilisateur: Utilisateur = {
   idUtilisateur: 1,
+  zitadelId: '376539212112986115',
   nom: 'Doe',
   prenom: 'Jane',
   email: 'jane@example.com',
@@ -121,6 +122,49 @@ describe('UtilisateurService', () => {
     it('should throw NotFoundException when utilisateur does not exist', async () => {
       mockRepo.findOne.mockResolvedValue(null);
       await expect(service.remove(999)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('syncFromZitadel', () => {
+    const zitadelId = '376539212112986115';
+    const email = 'jane@example.com';
+
+    it('should return the existing utilisateur when zitadelId is known', async () => {
+      mockRepo.findOne.mockResolvedValueOnce(mockUtilisateur);
+
+      const result = await service.syncFromZitadel(zitadelId, email);
+
+      expect(result).toEqual(mockUtilisateur);
+      expect(mockRepo.findOne).toHaveBeenCalledWith({ where: { zitadelId } });
+      expect(mockRepo.save).not.toHaveBeenCalled();
+    });
+
+    it('should link a legacy account found by email', async () => {
+      const legacy = { ...mockUtilisateur, zitadelId: null };
+      mockRepo.findOne
+        .mockResolvedValueOnce(null) // pas de match par zitadelId
+        .mockResolvedValueOnce(legacy); // match par email
+      mockRepo.save.mockImplementation((u: Utilisateur) => Promise.resolve(u));
+
+      const result = await service.syncFromZitadel(zitadelId, email);
+
+      expect(result.zitadelId).toBe(zitadelId);
+      expect(mockRepo.save).toHaveBeenCalledWith(
+        expect.objectContaining({ zitadelId, email }),
+      );
+      expect(mockRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('should create a new utilisateur when nothing matches', async () => {
+      mockRepo.findOne.mockResolvedValue(null);
+      const created = { zitadelId, email };
+      mockRepo.create.mockReturnValue(created);
+      mockRepo.save.mockResolvedValue(created);
+
+      const result = await service.syncFromZitadel(zitadelId, email);
+
+      expect(mockRepo.create).toHaveBeenCalledWith({ zitadelId, email });
+      expect(result).toEqual(created);
     });
   });
 });
