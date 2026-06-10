@@ -18,6 +18,8 @@ import {
   ApiParam,
   ApiBody,
 } from '@nestjs/swagger';
+import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import type { ZitadelJwtPayload } from '../../auth/jwt.strategy';
 import { UtilisateurService } from './utilisateur.service';
 import { CreateUtilisateurDto } from './dto/create-utilisateur.dto';
 import { UpdateUtilisateurDto } from './dto/update-utilisateur.dto';
@@ -44,6 +46,27 @@ export class UtilisateurController {
   })
   create(@Body() createUtilisateurDto: CreateUtilisateurDto) {
     return this.utilisateurService.create(createUtilisateurDto);
+  }
+
+  @Post('sync')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "Synchroniser l'utilisateur connecté depuis Zitadel",
+    description:
+      "Provisioning JIT : crée l'utilisateur en base au premier login " +
+      '(sub + email lus dans le token), le rattache par email si un compte ' +
+      'local existe déjà, sinon ne fait rien. Idempotent.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Utilisateur synchronisé (créé, rattaché ou déjà présent)',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Token Zitadel manquant ou invalide',
+  })
+  sync(@CurrentUser() user: ZitadelJwtPayload) {
+    return this.utilisateurService.syncFromZitadel(user.sub, user.email);
   }
 
   @Get()
