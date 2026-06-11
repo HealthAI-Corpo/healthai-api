@@ -1,170 +1,168 @@
-import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import * as bcrypt from 'bcrypt';
-import { Repository } from 'typeorm';
+import * as jsonwebtoken from 'jsonwebtoken';
+import jwksClient from 'jwks-rsa';
 
-import { Utilisateur } from '../modules/utilisateur/entities/utilisateur.entity';
-import { ProfilSante } from '../modules/profil-sante/entities/profil-sante.entity';
 import { AuthService } from './auth.service';
 
-const mockUtilisateur: Utilisateur = {
-  idUtilisateur: 1,
-  nom: 'Doe',
-  prenom: 'Jane',
-  email: 'user@example.com',
-  dateDeNaissance: new Date('1990-01-01'),
-  genre: 'F',
-  typeAbonnement: 'Freemium',
-  dateInscription: new Date('2024-01-01T00:00:00.000Z'),
-  motDePasseHash: 'hashed_password',
-  logsAliment: [],
-  logsSeance: [],
-  logsSante: [],
-  profilSante: {} as unknown as ProfilSante,
-};
-
-const mockUtilisateurRepository = {
-  findOne: jest.fn(),
-};
-
-const mockJwtService = {
-  sign: jest.fn().mockReturnValue('signed_token'),
-};
+jest.mock('jwks-rsa');
+jest.mock('jsonwebtoken');
 
 const mockConfigService = {
   getOrThrow: jest.fn((key: string) => {
     const values: Record<string, string> = {
-      JWT_SECRET: 'super_secret_key_that_is_at_least_32_chars',
-      JWT_ISSUER: 'healthai-api',
-      JWT_AUDIENCE: 'healthai-web',
+      ZITADEL_DOMAIN: 'https://example.zitadel.cloud',
+      JWT_ISSUER: 'https://example.zitadel.cloud',
+      JWT_AUDIENCE: 'healthai-api',
     };
     return values[key] ?? 'default_value';
   }),
-  get: jest.fn().mockReturnValue('3600s'),
 };
+
+const mockGetSigningKey = jest.fn();
+const mockGetPublicKey = jest.fn().mockReturnValue('public-key');
+mockGetSigningKey.mockResolvedValue({ getPublicKey: mockGetPublicKey });
+
+const mockJwksClientInstance = { getSigningKey: mockGetSigningKey };
+(jwksClient as jest.Mock).mockReturnValue(mockJwksClientInstance);
 
 describe('AuthService', () => {
   let service: AuthService;
-  let utilisateurRepository: jest.Mocked<Repository<Utilisateur>>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
-        {
-          provide: getRepositoryToken(Utilisateur),
-          useValue: mockUtilisateurRepository,
-        },
-        { provide: JwtService, useValue: mockJwtService },
         { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    utilisateurRepository = module.get<Repository<Utilisateur>>(
-      getRepositoryToken(Utilisateur),
-    ) as jest.Mocked<Repository<Utilisateur>>;
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+  afterEach(() => jest.clearAllMocks());
 
-  describe('login', () => {
-    it('should return an access_token when credentials are valid', async () => {
-      const hashedPassword = await bcrypt.hash('p@ssw0rd123', 10);
-      const utilisateur: Utilisateur = {
-        ...mockUtilisateur,
-        motDePasseHash: hashedPassword,
-      };
-      utilisateurRepository.findOne.mockResolvedValue(utilisateur);
+  describe('validateToken', () => {
+    const validPayload = {
+      sub: 'zitadel-user-id-123',
+      email: 'user@example.com',
+      iss: 'https://example.zitadel.cloud',
+      aud: 'healthai-api',
+      exp: Math.floor(Date.now() / 1000) + 3600,
+      iat: Math.floor(Date.now() / 1000),
+    };
 
-      const result = await service.login({
-        email: 'user@example.com',
-        password: 'p@ssw0rd123',
+    it('should return payload for a valid token', async () => {
+      (jsonwebtoken.decode as jest.Mock).mockReturnValue({
+        header: { kid: 'key-id-1', alg: 'RS256' },
+        payload: validPayload,
+        signature: 'sig',
+      });
+      (jsonwebtoken.verify as jest.Mock).mockReturnValue(validPayload);
+
+      const result = await service.validateToken('valid.jwt.token');
+
+      expect(result).toEqual(validPayload);
+      expect(mockGetSigningKey).toHaveBeenCalledWith('key-id-1');
+    });
+
+    it('should return null when token cannot be decoded', async () => {
+      (jsonwebtoken.decode as jest.Mock).mockReturnValue(null);
+
+      const result = await service.validateToken('garbage');
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null when token has no kid', async () => {
+      (jsonwebtoken.decode as jest.Mock).mockReturnValue({
+        header: { alg: 'RS256' },
+        payload: validPayload,
+        signature: 'sig',
       });
 
-      expect(result).toEqual({ access_token: 'signed_token' });
-      expect(mockJwtService.sign).toHaveBeenCalledWith(
-        {
-          sub: utilisateur.idUtilisateur,
-          email: utilisateur.email,
-        },
-        {
-          issuer: 'healthai-api',
-          audience: 'healthai-web',
-        },
+      const result = await service.validateToken('no-kid.jwt.token');
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null when verification throws', async () => {
+      (jsonwebtoken.decode as jest.Mock).mockReturnValue({
+        header: { kid: 'key-id-1', alg: 'RS256' },
+        payload: validPayload,
+        signature: 'sig',
+      });
+      (jsonwebtoken.verify as jest.Mock).mockImplementation(() => {
+        throw new Error('Token expired');
+      });
+
+      const result = await service.validateToken('expired.jwt.token');
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('getPrimaryRole', () => {
+    it('returns first Zitadel role when present', () => {
+      const role = service.getPrimaryRole({
+        sub: 'user-1',
+        email: 'u@example.com',
+        iss: 'https://example.zitadel.cloud',
+        aud: 'healthai-api',
+        exp: 9999999999,
+        iat: 0,
+        'urn:zitadel:iam:org:project:roles': { admin: {}, editor: {} },
+      });
+      expect(role).toBe('admin');
+    });
+
+    it('returns "user" when roles are missing', () => {
+      const role = service.getPrimaryRole({
+        sub: 'user-1',
+        email: 'u@example.com',
+        iss: 'https://example.zitadel.cloud',
+        aud: 'healthai-api',
+        exp: 9999999999,
+        iat: 0,
+      });
+      expect(role).toBe('user');
+    });
+  });
+
+  describe('fetchUserinfoEmail', () => {
+    const fetchMock = jest.fn();
+
+    beforeEach(() => {
+      global.fetch = fetchMock as unknown as typeof fetch;
+    });
+
+    afterEach(() => jest.clearAllMocks());
+
+    it('returns the email from the Zitadel userinfo endpoint', async () => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ email: 'wessim@example.com' }),
+      });
+
+      const email = await service.fetchUserinfoEmail('access-token');
+
+      expect(email).toBe('wessim@example.com');
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining('/oidc/v1/userinfo'),
+        { headers: { Authorization: 'Bearer access-token' } },
       );
     });
 
-    it('should throw UnauthorizedException when user is not found', async () => {
-      utilisateurRepository.findOne.mockResolvedValue(null);
+    it('returns null when userinfo responds with an error', async () => {
+      fetchMock.mockResolvedValue({ ok: false, status: 401 });
 
-      await expect(
-        service.login({ email: 'nobody@example.com', password: 'password' }),
-      ).rejects.toThrow(UnauthorizedException);
+      expect(await service.fetchUserinfoEmail('bad-token')).toBeNull();
     });
 
-    it('should throw UnauthorizedException when password is wrong', async () => {
-      const hashedPassword = await bcrypt.hash('correct_password', 10);
-      const utilisateur: Utilisateur = {
-        ...mockUtilisateur,
-        motDePasseHash: hashedPassword,
-      };
-      utilisateurRepository.findOne.mockResolvedValue(utilisateur);
+    it('returns null when userinfo is unreachable', async () => {
+      fetchMock.mockRejectedValue(new Error('ECONNREFUSED'));
 
-      await expect(
-        service.login({
-          email: 'user@example.com',
-          password: 'wrong_password',
-        }),
-      ).rejects.toThrow(UnauthorizedException);
-    });
-
-    it('should throw UnauthorizedException when stored hash is legacy plaintext', async () => {
-      const utilisateur: Utilisateur = {
-        ...mockUtilisateur,
-        motDePasseHash: 'legacy-password-not-set',
-      };
-      utilisateurRepository.findOne.mockResolvedValue(utilisateur);
-
-      await expect(
-        service.login({
-          email: 'user@example.com',
-          password: 'any_password',
-        }),
-      ).rejects.toThrow(UnauthorizedException);
-    });
-  });
-
-  describe('validateUser', () => {
-    it('should return the user when found', async () => {
-      utilisateurRepository.findOne.mockResolvedValue(mockUtilisateur);
-
-      const result = await service.validateUser({
-        sub: 1,
-        email: 'user@example.com',
-      });
-
-      expect(result).toEqual(mockUtilisateur);
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(utilisateurRepository.findOne).toHaveBeenCalledWith({
-        where: { idUtilisateur: 1 },
-      });
-    });
-
-    it('should return null when user is not found', async () => {
-      utilisateurRepository.findOne.mockResolvedValue(null);
-
-      const result = await service.validateUser({
-        sub: 9999,
-        email: 'no@example.com',
-      });
-
-      expect(result).toBeNull();
+      expect(await service.fetchUserinfoEmail('token')).toBeNull();
     });
   });
 });

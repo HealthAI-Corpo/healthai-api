@@ -6,11 +6,13 @@ import { App } from 'supertest/types';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
+jest.mock('jwks-rsa', () => jest.fn(() => ({ getSigningKey: jest.fn() })));
+
 describe('AuthController', () => {
   let app: INestApplication<App>;
   const authServiceMock = {
-    login: jest.fn().mockResolvedValue({ access_token: 'jwt-token' }),
     validateToken: jest.fn(),
+    getPrimaryRole: jest.fn().mockReturnValue('user'),
   };
 
   beforeEach(async () => {
@@ -28,19 +30,10 @@ describe('AuthController', () => {
     await app.close();
   });
 
-  it('POST /auth/login should return 200', async () => {
-    await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({ email: 'user@example.com', password: 'p@ssw0rd123' })
-      .expect(200);
-
-    expect(authServiceMock.login).toHaveBeenCalled();
-  });
-
   describe('GET /auth/validate', () => {
     it('should return 200 and inject headers when token is valid', async () => {
       authServiceMock.validateToken.mockResolvedValue({
-        sub: 42,
+        sub: 'zitadel-uuid-123',
         email: 'user@example.com',
       });
 
@@ -50,7 +43,7 @@ describe('AuthController', () => {
         .expect(200);
 
       expect(res.body).toEqual({ valid: true });
-      expect(res.headers['x-user-id']).toBe('42');
+      expect(res.headers['x-user-id']).toBe('zitadel-uuid-123');
       expect(res.headers['x-user-role']).toBe('user');
     });
 

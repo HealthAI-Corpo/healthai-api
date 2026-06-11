@@ -1,41 +1,33 @@
-import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
 
-import { ProfilSante } from '../modules/profil-sante/entities/profil-sante.entity';
-import { Utilisateur } from '../modules/utilisateur/entities/utilisateur.entity';
-import { JwtStrategy } from './jwt.strategy';
+import { JwtStrategy, ZitadelJwtPayload } from './jwt.strategy';
 
-const mockUtilisateur: Utilisateur = {
-  idUtilisateur: 1,
-  nom: 'Doe',
-  prenom: 'Jane',
-  email: 'jane@example.com',
-  dateDeNaissance: new Date('1990-01-01'),
-  genre: 'F',
-  typeAbonnement: 'Freemium',
-  dateInscription: new Date('2024-01-01'),
-  motDePasseHash: 'hashed',
-  logsAliment: [],
-  logsSeance: [],
-  logsSante: [],
-  profilSante: {} as unknown as ProfilSante,
-};
+// passportJwtSecret makes no network calls at construction — mock to isolate from JWKS
+jest.mock('jwks-rsa', () => ({
+  passportJwtSecret: jest.fn().mockReturnValue(jest.fn()),
+  default: jest.fn().mockReturnValue({ getSigningKey: jest.fn() }),
+}));
 
 const mockConfigService = {
   getOrThrow: jest.fn((key: string) => {
     const values: Record<string, string> = {
-      JWT_SECRET: 'super_secret_key_that_is_at_least_32_chars',
-      JWT_ISSUER: 'healthai-api',
-      JWT_AUDIENCE: 'healthai-web',
+      ZITADEL_DOMAIN: 'https://example.zitadel.cloud',
+      JWT_ISSUER: 'https://example.zitadel.cloud',
+      JWT_AUDIENCE: 'healthai-api',
     };
     return values[key] ?? 'default';
   }),
 };
 
-const mockUtilisateurRepo = {
-  findOne: jest.fn(),
+const validPayload: ZitadelJwtPayload = {
+  sub: 'zitadel-uuid-123',
+  email: 'jane@example.com',
+  iss: 'https://example.zitadel.cloud',
+  aud: 'healthai-api',
+  exp: Math.floor(Date.now() / 1000) + 3600,
+  iat: Math.floor(Date.now() / 1000),
+  'urn:zitadel:iam:org:project:roles': { admin: {} },
 };
 
 describe('JwtStrategy', () => {
@@ -46,10 +38,6 @@ describe('JwtStrategy', () => {
       providers: [
         JwtStrategy,
         { provide: ConfigService, useValue: mockConfigService },
-        {
-          provide: getRepositoryToken(Utilisateur),
-          useValue: mockUtilisateurRepo,
-        },
       ],
     }).compile();
 
@@ -59,26 +47,27 @@ describe('JwtStrategy', () => {
   afterEach(() => jest.clearAllMocks());
 
   describe('validate', () => {
-    it('should return id and email when user is found', async () => {
-      mockUtilisateurRepo.findOne.mockResolvedValue(mockUtilisateur);
-
-      const result = await strategy.validate({
-        sub: 1,
-        email: 'jane@example.com',
-      });
-
-      expect(result).toEqual({ idUtilisateur: 1, email: 'jane@example.com' });
-      expect(mockUtilisateurRepo.findOne).toHaveBeenCalledWith({
-        where: { idUtilisateur: 1 },
-      });
+    it('should return the Zitadel JWT payload as-is', () => {
+      const result = strategy.validate(validPayload);
+      expect(result).toEqual(validPayload);
     });
 
-    it('should throw UnauthorizedException when user is not found', async () => {
-      mockUtilisateurRepo.findOne.mockResolvedValue(null);
+    it('should return payload without roles when roles are absent', () => {
+      const payloadNoRoles: ZitadelJwtPayload = {
+        sub: 'zitadel-uuid-456',
+        email: 'user@example.com',
+        iss: 'https://example.zitadel.cloud',
+        aud: 'healthai-api',
+        exp: Math.floor(Date.now() / 1000) + 3600,
+        iat: Math.floor(Date.now() / 1000),
+      };
+      const result = strategy.validate(payloadNoRoles);
+      expect(result).toEqual(payloadNoRoles);
+    });
 
-      await expect(
-        strategy.validate({ sub: 999, email: 'nobody@example.com' }),
-      ).rejects.toThrow(UnauthorizedException);
+    it('should expose sub as the Zitadel user ID', () => {
+      const result = strategy.validate(validPayload);
+      expect(result.sub).toBe('zitadel-uuid-123');
     });
   });
 });

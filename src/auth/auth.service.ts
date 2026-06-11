@@ -1,73 +1,75 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
-import * as bcrypt from 'bcrypt';
-import { Repository } from 'typeorm';
+import jwksClient from 'jwks-rsa';
+import * as jsonwebtoken from 'jsonwebtoken';
 
-import { Utilisateur } from '../modules/utilisateur/entities/utilisateur.entity';
-import { LoginDto } from './dto/login.dto';
-
-export interface JwtPayload {
-  sub: number;
-  email: string;
-}
-
-const BCRYPT_HASH_PATTERN = /^\$2[abxy]\$\d{2}\$[./A-Za-z0-9]{53}$/;
+import { ZitadelJwtPayload } from './jwt.strategy';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    @InjectRepository(Utilisateur)
-    private readonly utilisateurRepository: Repository<Utilisateur>,
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
-  ) {}
+  private readonly jwksClient: jwksClient.JwksClient;
+  private readonly zitadelDomain: string;
 
-  async login(loginDto: LoginDto): Promise<{ access_token: string }> {
-    const { email, password } = loginDto;
-    const utilisateur = await this.utilisateurRepository.findOne({
-      where: { email },
-    });
-
-    const hasValidPasswordHash =
-      typeof utilisateur?.motDePasseHash === 'string' &&
-      BCRYPT_HASH_PATTERN.test(utilisateur.motDePasseHash);
-
-    if (
-      !utilisateur ||
-      !hasValidPasswordHash ||
-      !(await bcrypt.compare(password, utilisateur.motDePasseHash))
-    ) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    const payload: JwtPayload = {
-      sub: utilisateur.idUtilisateur,
-      email: utilisateur.email,
-    };
-    return {
-      access_token: this.jwtService.sign(payload, {
-        issuer: this.configService.getOrThrow<string>('JWT_ISSUER'),
-        audience: this.configService.getOrThrow<string>('JWT_AUDIENCE'),
-      }),
-    };
-  }
-
-  async validateUser(payload: JwtPayload): Promise<Utilisateur | null> {
-    return this.utilisateurRepository.findOne({
-      where: { idUtilisateur: payload.sub },
+  constructor(private readonly configService: ConfigService) {
+    this.zitadelDomain = configService
+      .getOrThrow<string>('ZITADEL_DOMAIN')
+      .replace(/\/$/, '');
+    this.jwksClient = jwksClient({
+      jwksUri: `${this.zitadelDomain}/oauth/v2/keys`,
+      cache: true,
+      cacheMaxAge: 10 * 60 * 1000,
+      rateLimit: true,
+      jwksRequestsPerMinute: 5,
     });
   }
 
-  async validateToken(token: string): Promise<JwtPayload | null> {
+  // L'access token JWT Zitadel ne porte que `sub` — l'email vit dans
+  // le userinfo endpoint, interrogé avec ce même token.
+  async fetchUserinfoEmail(accessToken: string): Promise<string | null> {
     try {
-      return await this.jwtService.verifyAsync<JwtPayload>(token, {
-        issuer: this.configService.getOrThrow<string>('JWT_ISSUER'),
-        audience: this.configService.getOrThrow<string>('JWT_AUDIENCE'),
+      const res = await fetch(`${this.zitadelDomain}/oidc/v1/userinfo`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
+      if (!res.ok) return null;
+      const body = (await res.json()) as { email?: string };
+      return body.email ?? null;
     } catch {
       return null;
     }
+  }
+
+  // Used by GET /auth/validate (Traefik forward-auth proxy)
+  async validateToken(token: string): Promise<ZitadelJwtPayload | null> {
+    try {
+      const decoded = jsonwebtoken.decode(token, { complete: true });
+      if (!decoded || typeof decoded === 'string' || !decoded.header.kid) {
+        return null;
+      }
+
+      const signingKey = await this.jwksClient.getSigningKey(
+        decoded.header.kid,
+      );
+      const publicKey = signingKey.getPublicKey();
+
+      const payload = jsonwebtoken.verify(token, publicKey, {
+        algorithms: ['RS256'],
+        issuer: this.configService.getOrThrow<string>('JWT_ISSUER'),
+        audience: this.configService.getOrThrow<string>('JWT_AUDIENCE'),
+      }) as ZitadelJwtPayload;
+
+      return payload;
+    } catch {
+      return null;
+    }
+  }
+
+  // Extract primary role from Zitadel's custom claim
+  getPrimaryRole(payload: ZitadelJwtPayload): string {
+    const roles = payload['urn:zitadel:iam:org:project:roles'];
+    if (roles && typeof roles === 'object') {
+      const first = Object.keys(roles)[0];
+      if (first) return first;
+    }
+    return 'user';
   }
 }

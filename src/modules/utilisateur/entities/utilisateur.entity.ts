@@ -17,21 +17,35 @@ export class Utilisateur {
   @PrimaryGeneratedColumn({ name: 'id_utilisateur' })
   idUtilisateur: number;
 
-  @Column({ type: 'varchar', length: 50, nullable: false })
-  nom: string;
+  // Identifiant unique (claim "sub") de l'utilisateur dans Zitadel.
+  // Nullable : les comptes créés avant la délégation d'auth n'en ont pas.
+  @Column({
+    type: 'varchar',
+    length: 64,
+    nullable: true,
+    unique: true,
+    name: 'zitadel_id',
+  })
+  @Index()
+  zitadelId: string | null;
 
-  @Column({ type: 'varchar', length: 50, nullable: false })
-  prenom: string;
+  // Nullables : un utilisateur provisionné au 1er login Zitadel n'a que
+  // son email — il complète son profil ensuite.
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  nom: string | null;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  prenom: string | null;
 
   @Column({ type: 'varchar', length: 255, nullable: false, unique: true })
   @Index()
   email: string;
 
-  @Column({ type: 'date', nullable: false, name: 'date_de_naissance' })
-  dateDeNaissance: Date;
+  @Column({ type: 'date', nullable: true, name: 'date_de_naissance' })
+  dateDeNaissance: Date | null;
 
-  @Column({ type: 'varchar', length: 50, nullable: false })
-  genre: string;
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  genre: string | null;
 
   @Column({
     type: 'varchar',
@@ -44,13 +58,15 @@ export class Utilisateur {
   @CreateDateColumn({ type: 'timestamp', name: 'date_inscription' })
   dateInscription: Date;
 
+  // Nullable : l'authentification est déléguée à Zitadel, seuls les
+  // anciens comptes locaux ont encore un hash.
   @Column({
     type: 'varchar',
     length: 255,
-    nullable: false,
+    nullable: true,
     name: 'mot_de_passe_hash',
   })
-  motDePasseHash: string;
+  motDePasseHash: string | null;
 
   @OneToMany(() => LogAliment, (logAliment) => logAliment.utilisateur, {
     cascade: true,

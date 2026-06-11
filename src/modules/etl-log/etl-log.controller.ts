@@ -55,7 +55,12 @@ export class EtlLogController {
     summary: 'Récupérer un log ETL',
     description: "Détails d'un log ETL par son ID",
   })
-  @ApiParam({ name: 'id', type: 'integer', description: 'ID du log ETL', example: 1 })
+  @ApiParam({
+    name: 'id',
+    type: 'integer',
+    description: 'ID du log ETL',
+    example: 1,
+  })
   @ApiResponse({ status: 200, description: 'Log ETL trouvé' })
   @ApiResponse({ status: 404, description: 'Log ETL introuvable' })
   findOne(@Param('id', ParseIntPipe) id: number) {
@@ -67,7 +72,12 @@ export class EtlLogController {
     summary: 'Modifier un log ETL',
     description: "Met à jour les informations d'un log ETL",
   })
-  @ApiParam({ name: 'id', type: 'integer', description: 'ID du log ETL', example: 1 })
+  @ApiParam({
+    name: 'id',
+    type: 'integer',
+    description: 'ID du log ETL',
+    example: 1,
+  })
   @ApiBody({ type: UpdateEtlLogDto })
   @ApiResponse({ status: 200, description: 'Log ETL mis à jour' })
   @ApiResponse({ status: 404, description: 'Log ETL introuvable' })
@@ -84,7 +94,12 @@ export class EtlLogController {
     summary: 'Supprimer un log ETL',
     description: 'Supprime un log ETL par son ID',
   })
-  @ApiParam({ name: 'id', type: 'integer', description: 'ID du log ETL', example: 1 })
+  @ApiParam({
+    name: 'id',
+    type: 'integer',
+    description: 'ID du log ETL',
+    example: 1,
+  })
   @ApiResponse({ status: 204, description: 'Log ETL supprimé' })
   @ApiResponse({ status: 404, description: 'Log ETL introuvable' })
   remove(@Param('id', ParseIntPipe) id: number) {

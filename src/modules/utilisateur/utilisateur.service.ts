@@ -19,6 +19,37 @@ export class UtilisateurService {
     return this.utilisateurRepository.save(utilisateur);
   }
 
+  /**
+   * Provisioning JIT : garantit qu'un utilisateur authentifié via Zitadel
+   * existe en base. Idempotent — appelé à chaque login.
+   */
+  async syncFromZitadel(
+    zitadelId: string,
+    email: string,
+  ): Promise<Utilisateur> {
+    const existing = await this.utilisateurRepository.findOne({
+      where: { zitadelId },
+    });
+    if (existing) {
+      return existing;
+    }
+
+    // Compte créé avant la délégation d'auth : on le rattache par email.
+    const legacy = await this.utilisateurRepository.findOne({
+      where: { email },
+    });
+    if (legacy) {
+      legacy.zitadelId = zitadelId;
+      return this.utilisateurRepository.save(legacy);
+    }
+
+    const utilisateur = this.utilisateurRepository.create({
+      zitadelId,
+      email,
+    });
+    return this.utilisateurRepository.save(utilisateur);
+  }
+
   async findAll(): Promise<Utilisateur[]> {
     return this.utilisateurRepository.find();
   }
